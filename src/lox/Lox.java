@@ -47,10 +47,10 @@ public class Lox {
     }
 
     private static void run(final String source) {
-        final Scanner scanner = new Scanner(source);
-        List<Token> tokens = scanner.scanTokens();
+        final Lexer scanner = new Lexer(source);
+        final List<Token> tokens = scanner.scanTokens();
 
-        for(Token token : tokens) {
+        for(final Token token : tokens) {
             System.out.println(token);
         }
     }
