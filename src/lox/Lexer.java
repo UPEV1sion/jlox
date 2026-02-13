@@ -82,6 +82,8 @@ public class Lexer {
             case '/':
                 if(match('/')) {
                     while(peek() != '\n' && !isAtEnd()) advance();
+                } else if(match('*')) {
+                    multilineComment();
                 } else {
                     addToken(SLASH);
                 }
@@ -145,6 +147,21 @@ public class Lexer {
 
         final String value = source.substring(start + 1, current - 1);
         addToken(STRING, value);
+    }
+
+    private void multilineComment() {
+        while ((peek() != '*' || peekNext() != '/') && !isAtEnd()) {
+            if(peek() == '\n') line++;
+            advance();
+        }
+
+        if(isAtEnd()) {
+            Lox.error(line, "Unterminated multiline comment.");
+            return;
+        }
+
+        advance();
+        advance();
     }
 
     private boolean match(final char expected) {
