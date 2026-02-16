@@ -83,7 +83,7 @@ public class Lexer {
                 if(match('/')) {
                     while(peek() != '\n' && !isAtEnd()) advance();
                 } else if(match('*')) {
-                    multilineComment();
+                    multilineCommentRec();
                 } else {
                     addToken(SLASH);
                 }
@@ -147,6 +147,22 @@ public class Lexer {
 
         final String value = source.substring(start + 1, current - 1);
         addToken(STRING, value);
+    }
+
+    private void multilineCommentRec() {
+        while((peek() != '*' || peekNext() != '/') && !isAtEnd()) {
+            if(peek() == '/' && peekNext() == '*') multilineCommentRec();
+            if(peek() == '\n') line++;
+            advance();
+        }
+
+        if(isAtEnd()) {
+            Lox.error(line, "Unterminated multiline comment.");
+            return;
+        }
+
+        advance();
+        advance();
     }
 
     private void multilineComment() {
