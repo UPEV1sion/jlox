@@ -133,9 +133,15 @@ public class Lexer {
     }
 
     private void string() {
+        final StringBuilder sb = new StringBuilder();
+
         while(peek() != '"' && !isAtEnd()) {
             if(peek() == '\n') line++;
-            advance();
+            if(match('\\')) {
+                sb.append(parseEscape(advance()));
+            } else {
+                sb.append(advance());
+            }
         }
 
         if(isAtEnd()) {
@@ -144,9 +150,7 @@ public class Lexer {
         }
 
         advance();
-
-        final String value = source.substring(start + 1, current - 1);
-        addToken(STRING, value);
+        addToken(STRING, sb.toString());
     }
 
     private void multilineCommentRec() {
@@ -196,6 +200,20 @@ public class Lexer {
     private char peekNext() {
         if(current + 1 >= source.length()) return '\0';
         return source.charAt(current + 1);
+    }
+
+    private char parseEscape(final char c) {
+        return switch (c) {
+            case 't'  -> '\t';
+            case 'b'  -> '\b';
+            case 'n'  -> '\n';
+            case 'r'  -> '\r';
+            case 'f'  -> '\f';
+            case '\'' -> '\'';
+            case '"'  -> '"';
+            case '\\' -> '\\';
+            default   -> '\0';
+        };
     }
 
     private boolean isAlpha(final char c) {
