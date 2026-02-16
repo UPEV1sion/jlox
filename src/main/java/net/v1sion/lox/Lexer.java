@@ -83,7 +83,7 @@ public class Lexer {
                 if(match('/')) {
                     while(peek() != '\n' && !isAtEnd()) advance();
                 } else if(match('*')) {
-                    multilineCommentRec();
+                    multilineCommentIter();
                 } else {
                     addToken(SLASH);
                 }
@@ -153,11 +153,17 @@ public class Lexer {
         addToken(STRING, sb.toString());
     }
 
+    // This is a recursive implementation of nested comments, the iterative one will be used.
     private void multilineCommentRec() {
         while((peek() != '*' || peekNext() != '/') && !isAtEnd()) {
-            if(peek() == '/' && peekNext() == '*') multilineCommentRec();
             if(peek() == '\n') line++;
-            advance();
+            if(peek() == '/' && peekNext() == '*') {
+                advance();
+                advance();
+                multilineCommentRec();
+            } else {
+                advance();
+            }
         }
 
         if(isAtEnd()) {
@@ -169,6 +175,32 @@ public class Lexer {
         advance();
     }
 
+    // This is an iterative implementation of nested comments.
+    private void multilineCommentIter() {
+        int depth = 1;
+        while(depth > 0 && !isAtEnd()) {
+            if(peek() == '\n') line++;
+            if(peek() == '/' && peekNext() == '*') {
+                advance();
+                advance();
+                depth++;
+            } else if(peek() == '*' && peekNext() == '/') {
+                advance();
+                advance();
+                depth--;
+            } else {
+                advance();
+            }
+        }
+
+        if(isAtEnd()) {
+            Lox.error(line, "Unterminated multiline comment.");
+            return;
+        }
+    }
+
+
+    // Normal multiline comments, without nesting
     private void multilineComment() {
         while ((peek() != '*' || peekNext() != '/') && !isAtEnd()) {
             if(peek() == '\n') line++;
