@@ -1,11 +1,11 @@
-package lox;
+package net.v1sion.lox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static lox.TokenType.*;
+import static net.v1sion.lox.TokenType.*;
 
 /**
  * @author Emanuel Schäffer

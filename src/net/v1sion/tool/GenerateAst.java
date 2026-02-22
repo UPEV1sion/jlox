@@ -1,4 +1,4 @@
-package tool;
+package net.v1sion.tool;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -36,13 +36,13 @@ public class GenerateAst {
         final String path = outputDir + "/" + baseName + ".java";
         final PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8);
 
-        writer.println("package com.craftinginterpreters.lox;");
+        writer.println("package lox;");
         writer.println();
         writer.println("import java.util.List;");
         writer.println();
         writer.println("abstract class " + baseName + " {");
 
-        writer.println(" ".repeat(INDENT) + "abstract <R> R accept(Visitor<R> visitor);");
+        writer.println(" ".repeat(INDENT) + "abstract <R> R accept(final Visitor<R> visitor);");
         writer.println();
 
         defineVisitor(writer, baseName, types);
@@ -53,7 +53,6 @@ public class GenerateAst {
             defineType(writer, baseName, className, fields);
         }
 
-
         writer.println("}");
         writer.close();
     }
@@ -63,7 +62,7 @@ public class GenerateAst {
         for(final String type : types) {
             final String typeName = type.split(":")[0].trim();
             writer.println(" ".repeat(INDENT * 2) + "R visit" + typeName + baseName +
-                    "(" + typeName + " " + baseName.toLowerCase() + ");");
+                    "(final " + typeName + " " + baseName.toLowerCase() + ");");
         }
         writer.println(" ".repeat(INDENT) + "}");
     }
@@ -93,7 +92,7 @@ public class GenerateAst {
 
         writer.println();
         writer.println(" ".repeat(INDENT * 2) + "@Override");
-        writer.println(" ".repeat(INDENT * 2) + "<R> R accept (Visitor<R> visitor) {");
+        writer.println(" ".repeat(INDENT * 2) + "<R> R accept (final Visitor<R> visitor) {");
         writer.println(" ".repeat(INDENT * 3) + "return visitor.visit" + className + baseName + "(this);");
         writer.println(" ".repeat(INDENT * 2) + "}");
 

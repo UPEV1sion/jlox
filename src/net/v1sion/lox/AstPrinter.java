@@ -1,0 +1,56 @@
+package net.v1sion.lox;
+
+import static net.v1sion.lox.Expr.*;
+
+public class AstPrinter implements Visitor<String> {
+    String print(final Expr expr) {
+        return expr.accept(this);
+    }
+
+    @Override
+    public String visitBinaryExpr(final Binary expr) {
+        return parenthesize(expr.operator.lexeme, expr.left, expr.right);
+    }
+
+    @Override
+    public String visitGroupingExpr(final Grouping expr) {
+        return parenthesize("group", expr.expression);
+    }
+
+    @Override
+    public String visitLiteralExpr(final Literal expr) {
+        if(expr.value == null) return "nil";
+        return expr.value.toString();
+    }
+
+    @Override
+    public String visitUnaryExpr(final Unary expr) {
+        return parenthesize(expr.operator.lexeme, expr.right);
+    }
+
+    private String parenthesize(final String name, Expr... exprs) {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("(").append(name);
+        for(final Expr expr : exprs) {
+            builder.append(" ");
+            builder.append(expr.accept(this));
+        }
+        builder.append(")");
+
+        return builder.toString();
+    }
+
+    public static void main(String[] args) {
+        final Expr expr = new Binary(
+                new Unary(
+                        new Token(TokenType.MINUS, "-", null, 1),
+                        new Literal(123)
+                ),
+                new Token(TokenType.STAR, "*", null, 1),
+                new Grouping(new Literal(45.67))
+        );
+
+        System.out.println(new AstPrinter().print(expr));
+    }
+}

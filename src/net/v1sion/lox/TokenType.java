@@ -1,4 +1,4 @@
-package lox;
+package net.v1sion.lox;
 
 /**
  * @author Emanuel Schäffer
