@@ -1,0 +1,17 @@
+expr -> expr postfix_seq
+expr -> IDENTIFIER
+expr -> NUMBER
+
+postfix_seq -> postfix postfix_seq
+postfix_seq -> postfix
+
+postfix -> "(" args ")"
+postfix -> "." IDENTIFER
+
+args -> arg_list
+args -> ε
+
+arg_list -> expr arg_list_tail
+
+arg_list_tail -> "," expr arg_list_tail
+arg_list_tail -> ε
