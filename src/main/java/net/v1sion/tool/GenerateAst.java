@@ -6,6 +6,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Emanuel Schäffer
+ * at 21.02.26
+ **/
+
 public class GenerateAst {
     private static final int INDENT = 4;
 
@@ -36,13 +41,31 @@ public class GenerateAst {
         writer.println("import java.util.List;");
         writer.println();
         writer.println("abstract class " + baseName + " {");
+
+        writer.println(" ".repeat(INDENT) + "abstract <R> R accept(Visitor<R> visitor);");
+        writer.println();
+
+        defineVisitor(writer, baseName, types);
+
         for(final String type : types) {
             final String className = type.split(":")[0].trim();
             final String fields = type.split(":")[1].trim();
             defineType(writer, baseName, className, fields);
         }
+
+
         writer.println("}");
         writer.close();
+    }
+
+    private static void defineVisitor(final PrintWriter writer, final String baseName, final List<String> types) {
+        writer.println(" ".repeat(INDENT) + "interface Visitor<R> {");
+        for(final String type : types) {
+            final String typeName = type.split(":")[0].trim();
+            writer.println(" ".repeat(INDENT * 2) + "R visit" + typeName + baseName +
+                    "(" + typeName + " " + baseName.toLowerCase() + ");");
+        }
+        writer.println(" ".repeat(INDENT) + "}");
     }
 
     private static void defineType(
@@ -51,6 +74,7 @@ public class GenerateAst {
             final String className,
             final String fieldList
     ) {
+        writer.println();
         writer.println(" ".repeat(INDENT) + "static class " + className + " extends " + baseName + " {");
 
         final String[] fields = fieldList.split(", ");
@@ -66,6 +90,13 @@ public class GenerateAst {
             writer.println(" ".repeat(INDENT * 3) + "this." + name + " = " + name + ";");
         }
         writer.println(" ".repeat(INDENT * 2) + "}");
+
+        writer.println();
+        writer.println(" ".repeat(INDENT * 2) + "@Override");
+        writer.println(" ".repeat(INDENT * 2) + "<R> R accept (Visitor<R> visitor) {");
+        writer.println(" ".repeat(INDENT * 3) + "return visitor.visit" + className + baseName + "(this);");
+        writer.println(" ".repeat(INDENT * 2) + "}");
+
 
         writer.println(" ".repeat(INDENT) + "}");
     }
