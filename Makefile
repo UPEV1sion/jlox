@@ -1,6 +1,6 @@
 SRC_DIR := src
 OUT_DIR := out
-MAIN    := lox.Lox
+MAIN    := net.v1sion.lox.Lox
 
 SOURCES := $(shell find $(SRC_DIR) -name "*.java")
 

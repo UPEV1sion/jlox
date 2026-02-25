@@ -15,7 +15,7 @@ import java.util.List;
 
 public class Lox {
     static boolean hadError = false;
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
         if(args.length > 1) {
             System.err.println("[Usage] jlox [script]");
             System.exit(64);
@@ -49,10 +49,16 @@ public class Lox {
     private static void run(final String source) {
         final Lexer scanner = new Lexer(source);
         final List<Token> tokens = scanner.scanTokens();
+        final Parser parser = new Parser(tokens);
+        final Expr expr = parser.parse();
 
-        for(final Token token : tokens) {
-            System.out.println(token);
-        }
+        if(hadError) return;
+
+        System.out.println(new AstPrinter().print(expr));
+
+//        for(final Token token : tokens) {
+//            System.out.println(token);
+//        }
     }
 
     static void error(final int line, final String message) {
@@ -62,5 +68,13 @@ public class Lox {
     private static void report(final int line, final String where, final String message) {
         System.err.println("[line " + line + "] Error" + where + ": " + message);
         hadError = true;
+    }
+
+    static void error(final Token token, final String message) {
+        if (token.type == TokenType.EOF) {
+            report(token.line, " at end", message);
+        } else {
+            report(token.line, " at'" + token.lexeme + "'", message);
+        }
     }
 }

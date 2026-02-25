@@ -10,11 +10,21 @@ import static net.v1sion.lox.TokenType.*;
  **/
 
 public class Parser {
+    private static class ParseError extends RuntimeException {}
+
     private final List<Token> tokens;
     private int current;
 
     Parser(final List<Token> tokens) {
         this.tokens = tokens;
+    }
+
+    Expr parse() {
+        try {
+            return expression();
+        } catch (final ParseError error) {
+            return null;
+        }
     }
 
     private Expr expression() {
@@ -91,7 +101,7 @@ public class Parser {
             return new Expr.Grouping(expr);
         }
 
-        return null;
+        throw error(peek(), "Expect expression");
     }
 
     private boolean match(final TokenType... types) {
@@ -107,7 +117,8 @@ public class Parser {
 
     private Token consume(final TokenType type, final String message) {
         if(check(type)) return advance();
-        return null;
+
+        throw error(peek(), message);
     }
 
     private boolean check(final TokenType type) {
@@ -130,5 +141,23 @@ public class Parser {
 
     private Token previous() {
         return tokens.get(current - 1);
+    }
+
+    private ParseError error(final Token token, final String message) {
+        Lox.error(token, message);
+        return new ParseError();
+    }
+
+    private void synchronize() {
+        advance();
+        while(!isAtEnd()) {
+            if(previous().type == SEMICOLON) return;
+
+            switch (peek().type) {
+                case CLASS, FOR, FUN, IF, PRINT, RETURN, VAR, WHILE -> {return;}
+            }
+        }
+
+        advance();
     }
 }
