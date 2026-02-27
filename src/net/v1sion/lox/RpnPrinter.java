@@ -1,5 +1,8 @@
 package net.v1sion.lox;
 
+import java.util.Iterator;
+import java.util.List;
+
 import static net.v1sion.lox.Expr.*;
 
 public class RpnPrinter implements Visitor<String> {
@@ -29,7 +32,31 @@ public class RpnPrinter implements Visitor<String> {
         return expr.right.accept(this) + " " + expr.operator.lexeme;
     }
 
+    @Override
+    public String visitCommaExpr(final Comma expr) {
+        final StringBuilder sb = new StringBuilder();
+        Iterator<Expr> iterator = expr.expressions.iterator();
+        sb.append(iterator.next().accept(this));
+        while(iterator.hasNext()) {
+            sb.append(" pop ").append(iterator.next().accept(this));
+        }
+        return sb.toString();
+    }
+
     public static void main(String[] args) {
+        final Expr comma = new Comma(List.of(
+                new Binary(
+                        new Literal(1),
+                        new Token(TokenType.PLUS, "+", null, 1),
+                        new Literal(2)
+                ),
+                new Binary(
+                        new Literal(4),
+                        new Token(TokenType.MINUS, "-", null, 1),
+                        new Literal(3)
+                )
+        ));
+
         final Expr expr = new Binary(
             new Grouping(
                   new Binary(
@@ -48,6 +75,6 @@ public class RpnPrinter implements Visitor<String> {
             )
         );
 
-        System.out.println(new RpnPrinter().print(expr));
+        System.out.println(new RpnPrinter().print(comma));
     }
 }

@@ -25,7 +25,8 @@ public class GenerateAst {
             "Binary   : Expr left, Token operator, Expr right",
             "Grouping : Expr expression",
             "Literal  : Object value",
-            "Unary    : Token operator, Expr right"
+            "Unary    : Token operator, Expr right",
+            "Comma    : List<Expr> expressions"
         ));
     }
 
@@ -36,7 +37,7 @@ public class GenerateAst {
         final String path = outputDir + "/" + baseName + ".java";
         final PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8);
 
-        writer.println("package lox;");
+        writer.println("package net.v1sion.lox;");
         writer.println();
         writer.println("import java.util.List;");
         writer.println();

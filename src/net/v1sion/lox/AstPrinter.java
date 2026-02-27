@@ -1,5 +1,8 @@
 package net.v1sion.lox;
 
+import java.util.Iterator;
+import java.util.List;
+
 import static net.v1sion.lox.Expr.*;
 
 public class AstPrinter implements Visitor<String> {
@@ -28,6 +31,11 @@ public class AstPrinter implements Visitor<String> {
         return parenthesize(expr.operator.lexeme, expr.right);
     }
 
+    @Override
+    public String visitCommaExpr(final Comma expr) {
+        return parenthesize("progn", expr.expressions.toArray(new Expr[0]));
+    }
+
     private String parenthesize(final String name, Expr... exprs) {
         final StringBuilder builder = new StringBuilder();
 
@@ -42,6 +50,19 @@ public class AstPrinter implements Visitor<String> {
     }
 
     public static void main(String[] args) {
+        final Expr comma = new Comma(List.of(
+                new Binary(
+                        new Literal(1),
+                        new Token(TokenType.PLUS, "+", null, 1),
+                        new Literal(2)
+                ),
+                new Binary(
+                        new Literal(4),
+                        new Token(TokenType.MINUS, "-", null, 1),
+                        new Literal(3)
+                )
+        ));
+
         final Expr expr = new Binary(
                 new Unary(
                         new Token(TokenType.MINUS, "-", null, 1),
@@ -51,6 +72,6 @@ public class AstPrinter implements Visitor<String> {
                 new Grouping(new Literal(45.67))
         );
 
-        System.out.println(new AstPrinter().print(expr));
+        System.out.println(new AstPrinter().print(comma));
     }
 }
