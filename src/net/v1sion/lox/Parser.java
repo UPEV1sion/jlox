@@ -1,5 +1,6 @@
 package net.v1sion.lox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static net.v1sion.lox.TokenType.*;
@@ -28,7 +29,22 @@ public class Parser {
     }
 
     private Expr expression() {
-        return equality();
+        return comma();
+    }
+
+    private Expr comma() {
+        Expr expr = equality();
+        if(!match(COMMA)) return expr;
+
+        final List<Expr> exprs = new ArrayList<>();
+        exprs.add(expr);
+
+        do {
+            final Expr right = equality();
+            exprs.add(right);
+        } while(match(COMMA));
+
+        return new Expr.Comma(exprs);
     }
 
     private Expr equality() {
