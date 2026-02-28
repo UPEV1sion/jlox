@@ -36,6 +36,11 @@ public class AstPrinter implements Visitor<String> {
         return parenthesize("progn", expr.expressions.toArray(new Expr[0]));
     }
 
+    @Override
+    public String visitTernaryExpr(Ternary expr) {
+        return parenthesize("if", expr.cond, expr.thenBranch, expr.elseBranch);
+    }
+
     private String parenthesize(final String name, Expr... exprs) {
         final StringBuilder builder = new StringBuilder();
 

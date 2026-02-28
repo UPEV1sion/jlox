@@ -2,6 +2,7 @@ package net.v1sion.lox;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static net.v1sion.lox.Expr.*;
 
@@ -34,15 +35,21 @@ public class RpnPrinter implements Visitor<String> {
 
     @Override
     public String visitCommaExpr(final Comma expr) {
-        final StringBuilder sb = new StringBuilder();
-        Iterator<Expr> iterator = expr.expressions.iterator();
-        sb.append(iterator.next().accept(this));
-        while(iterator.hasNext()) {
-            sb.append(" pop ").append(iterator.next().accept(this));
-        }
-        return sb.toString();
+        return expr.expressions.stream()
+                .map(e -> e.accept(this))
+                .collect(Collectors.joining(" pop "));
     }
 
+    @Override
+    public String visitTernaryExpr(Ternary expr) {
+        final String ternary = String.join(" ",
+                expr.cond.accept(this),
+                expr.thenBranch.accept(this),
+                expr.elseBranch.accept(this)
+        );
+
+        return ternary + " ?:";
+    }
     public static void main(String[] args) {
         final Expr comma = new Comma(List.of(
                 new Binary(

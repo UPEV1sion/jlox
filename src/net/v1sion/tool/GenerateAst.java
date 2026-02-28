@@ -26,7 +26,8 @@ public class GenerateAst {
             "Grouping : Expr expression",
             "Literal  : Object value",
             "Unary    : Token operator, Expr right",
-            "Comma    : List<Expr> expressions"
+            "Comma    : List<Expr> expressions",
+            "Ternary  : Expr cond, Expr thenBranch, Expr elseBranch"
         ));
     }
 

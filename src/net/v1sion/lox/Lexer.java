@@ -66,6 +66,8 @@ public class Lexer {
             case '-' -> addToken(MINUS);
             case '+' -> addToken(PLUS);
             case ';' -> addToken(SEMICOLON);
+            case '?' -> addToken(QUESTION_MARK);
+            case ':' -> addToken(COLON);
             case '*' -> addToken(STAR);
             case '!' -> addToken(match('=') ? BANG_EQUAL : BANG);
             case '=' -> addToken(match('=') ? EQUAL_EQUAL : EQUAL);

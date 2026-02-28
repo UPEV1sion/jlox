@@ -33,18 +33,30 @@ public class Parser {
     }
 
     private Expr comma() {
-        Expr expr = equality();
+        Expr expr = ternary();
         if(!match(COMMA)) return expr;
 
         final List<Expr> exprs = new ArrayList<>();
         exprs.add(expr);
 
         do {
-            final Expr right = equality();
+            final Expr right = ternary();
             exprs.add(right);
         } while(match(COMMA));
 
         return new Expr.Comma(exprs);
+    }
+
+    private Expr ternary() {
+        Expr expr = equality();
+
+        if(!match(QUESTION_MARK)) return expr;
+
+        Expr thenBranch = ternary();
+        consume(COLON, "Expect ':' in ternary operator");
+        Expr elseBranch = ternary();
+
+        return new Expr.Ternary(expr, thenBranch, elseBranch);
     }
 
     private Expr equality() {
