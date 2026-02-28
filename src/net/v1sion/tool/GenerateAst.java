@@ -43,7 +43,7 @@ public class GenerateAst {
         writer.println();
         writer.println("abstract class " + baseName + " {");
 
-        writer.println(" ".repeat(INDENT) + "abstract <R> R accept(final Visitor<R> visitor);");
+        writer.println(indent(1) + "abstract <R> R accept(final Visitor<R> visitor);");
         writer.println();
 
         defineVisitor(writer, baseName, types);
@@ -59,13 +59,13 @@ public class GenerateAst {
     }
 
     private static void defineVisitor(final PrintWriter writer, final String baseName, final List<String> types) {
-        writer.println(" ".repeat(INDENT) + "interface Visitor<R> {");
+        writer.println(indent(1) + "interface Visitor<R> {");
         for(final String type : types) {
             final String typeName = type.split(":")[0].trim();
-            writer.println(" ".repeat(INDENT * 2) + "R visit" + typeName + baseName +
+            writer.println(indent(2) + "R visit" + typeName + baseName +
                     "(final " + typeName + " " + baseName.toLowerCase() + ");");
         }
-        writer.println(" ".repeat(INDENT) + "}");
+        writer.println(indent(1) + "}");
     }
 
     private static void defineType(
@@ -75,29 +75,33 @@ public class GenerateAst {
             final String fieldList
     ) {
         writer.println();
-        writer.println(" ".repeat(INDENT) + "static class " + className + " extends " + baseName + " {");
+        writer.println(indent(1) + "static class " + className + " extends " + baseName + " {");
 
         final String[] fields = fieldList.split(", ");
 
         for(final String field : fields) {
-            writer.println(" ".repeat(INDENT * 2) + "final " + field + ";");
+            writer.println(indent(2) + "final " + field + ";");
         }
 
         writer.println();
-        writer.println(" ".repeat(INDENT * 2) + className + "(" + fieldList + ") {");
+        writer.println(indent(2) + className + "(" + fieldList + ") {");
         for(final String field : fields) {
             final String name = field.split(" ")[1];
-            writer.println(" ".repeat(INDENT * 3) + "this." + name + " = " + name + ";");
+            writer.println(indent(3) + "this." + name + " = " + name + ";");
         }
-        writer.println(" ".repeat(INDENT * 2) + "}");
+        writer.println(indent(2) + "}");
 
         writer.println();
-        writer.println(" ".repeat(INDENT * 2) + "@Override");
-        writer.println(" ".repeat(INDENT * 2) + "<R> R accept (final Visitor<R> visitor) {");
-        writer.println(" ".repeat(INDENT * 3) + "return visitor.visit" + className + baseName + "(this);");
-        writer.println(" ".repeat(INDENT * 2) + "}");
+        writer.println(indent(2) + "@Override");
+        writer.println(indent(2) + "<R> R accept (final Visitor<R> visitor) {");
+        writer.println(indent(3) + "return visitor.visit" + className + baseName + "(this);");
+        writer.println(indent(2) + "}");
 
 
-        writer.println(" ".repeat(INDENT) + "}");
+        writer.println(indent(1) + "}");
+    }
+
+    private static String indent(final int tabs) {
+        return " ".repeat(INDENT * tabs);
     }
 }
