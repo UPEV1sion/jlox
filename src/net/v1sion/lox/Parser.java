@@ -34,17 +34,14 @@ public class Parser {
 
     private Expr comma() {
         Expr expr = ternary();
-        if(!match(COMMA)) return expr;
 
-        final List<Expr> exprs = new ArrayList<>();
-        exprs.add(expr);
+        while(match(COMMA)) {
+            final Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Binary(expr, operator, right);
+        }
 
-        do {
-            final Expr right = ternary();
-            exprs.add(right);
-        } while(match(COMMA));
-
-        return new Expr.Comma(exprs);
+        return expr;
     }
 
     private Expr ternary() {
@@ -52,7 +49,7 @@ public class Parser {
 
         if(!match(QUESTION_MARK)) return expr;
 
-        Expr thenBranch = ternary();
+        Expr thenBranch = expression();
         consume(COLON, "Expect ':' in ternary operator");
         Expr elseBranch = ternary();
 
@@ -107,13 +104,11 @@ public class Parser {
     }
 
     private Expr unary() {
-        if(match(BANG, MINUS)) {
-            final Token operator = previous();
-            final Expr right = unary();
-            return new Expr.Unary(operator, right);
-        }
+        if(!match(BANG, MINUS)) return primary();
 
-        return primary();
+        final Token operator = previous();
+        final Expr right = unary();
+        return new Expr.Unary(operator, right);
     }
 
     private Expr primary() {
@@ -127,6 +122,30 @@ public class Parser {
             final Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+
+        if(match(BANG_EQUAL, EQUAL_EQUAL)) {
+            error(previous(), "Missing left hand operand");
+            equality();
+            return null;
+        }
+
+        if(match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+            error(previous(), "Missing left hand operand");
+            comparison();
+            return null;
+        }
+
+        if(match(PLUS)) {
+            error(previous(), "Missing left hand operand");
+            term();
+            return null;
+        }
+
+        if(match(STAR, SLASH)) {
+            error(previous(), "Missing left hand operand");
+            factor();
+            return null;
         }
 
         throw error(peek(), "Expect expression");

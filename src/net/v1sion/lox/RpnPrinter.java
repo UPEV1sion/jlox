@@ -30,14 +30,7 @@ public class RpnPrinter implements Visitor<String> {
 
     @Override
     public String visitUnaryExpr(final Unary expr) {
-        return expr.right.accept(this) + " " + expr.operator.lexeme;
-    }
-
-    @Override
-    public String visitCommaExpr(final Comma expr) {
-        return expr.expressions.stream()
-                .map(e -> e.accept(this))
-                .collect(Collectors.joining(" pop "));
+        return expr.operator.lexeme + expr.right.accept(this);
     }
 
     @Override
@@ -51,18 +44,19 @@ public class RpnPrinter implements Visitor<String> {
         return ternary + " ?:";
     }
     public static void main(String[] args) {
-        final Expr comma = new Comma(List.of(
+        final Expr comma = new Binary(
                 new Binary(
                         new Literal(1),
                         new Token(TokenType.PLUS, "+", null, 1),
                         new Literal(2)
                 ),
+                new Token(TokenType.COMMA, ",", null, 1),
                 new Binary(
                         new Literal(4),
                         new Token(TokenType.MINUS, "-", null, 1),
                         new Literal(3)
                 )
-        ));
+        );
 
         final Expr expr = new Binary(
             new Grouping(

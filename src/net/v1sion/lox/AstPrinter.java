@@ -32,11 +32,6 @@ public class AstPrinter implements Visitor<String> {
     }
 
     @Override
-    public String visitCommaExpr(final Comma expr) {
-        return parenthesize("progn", expr.expressions.toArray(new Expr[0]));
-    }
-
-    @Override
     public String visitTernaryExpr(Ternary expr) {
         return parenthesize("if", expr.cond, expr.thenBranch, expr.elseBranch);
     }
@@ -55,18 +50,19 @@ public class AstPrinter implements Visitor<String> {
     }
 
     public static void main(String[] args) {
-        final Expr comma = new Comma(List.of(
+        final Expr comma = new Binary(
                 new Binary(
                         new Literal(1),
                         new Token(TokenType.PLUS, "+", null, 1),
                         new Literal(2)
                 ),
+                new Token(TokenType.COMMA, ",", null, 1),
                 new Binary(
                         new Literal(4),
                         new Token(TokenType.MINUS, "-", null, 1),
                         new Literal(3)
                 )
-        ));
+        );
 
         final Expr expr = new Binary(
                 new Unary(

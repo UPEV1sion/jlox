@@ -10,7 +10,6 @@ abstract class Expr {
         R visitGroupingExpr(final Grouping expr);
         R visitLiteralExpr(final Literal expr);
         R visitUnaryExpr(final Unary expr);
-        R visitCommaExpr(final Comma expr);
         R visitTernaryExpr(final Ternary expr);
     }
 
@@ -69,19 +68,6 @@ abstract class Expr {
         @Override
         <R> R accept (final Visitor<R> visitor) {
             return visitor.visitUnaryExpr(this);
-        }
-    }
-
-    static class Comma extends Expr {
-        final List<Expr> expressions;
-
-        Comma(List<Expr> expressions) {
-            this.expressions = expressions;
-        }
-
-        @Override
-        <R> R accept (final Visitor<R> visitor) {
-            return visitor.visitCommaExpr(this);
         }
     }
 

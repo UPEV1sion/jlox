@@ -54,7 +54,7 @@ public class Lox {
 
         if(hadError) return;
 
-        System.out.println(new RpnPrinter().print(expr));
+        System.out.println(new AstPrinter().print(expr));
 
 //        for(final Token token : tokens) {
 //            System.out.println(token);
@@ -66,7 +66,7 @@ public class Lox {
     }
 
     private static void report(final int line, final String where, final String message) {
-        System.err.println("[line " + line + "] Error" + where + ": " + message);
+        System.err.println("[line " + line + "] Error " + where + ": " + message);
         hadError = true;
     }
 
