@@ -22,7 +22,7 @@ public class AstPrinter implements Visitor<String> {
 
     @Override
     public String visitLiteralExpr(final Literal expr) {
-        if(expr.value == null) return "nil";
+        if (expr.value == null) return "nil";
         return expr.value.toString();
     }
 
@@ -40,7 +40,7 @@ public class AstPrinter implements Visitor<String> {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("(").append(name);
-        for(final Expr expr : exprs) {
+        for (final Expr expr : exprs) {
             builder.append(" ");
             builder.append(expr.accept(this));
         }

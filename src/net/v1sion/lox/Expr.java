@@ -7,9 +7,13 @@ abstract class Expr {
 
     interface Visitor<R> {
         R visitBinaryExpr(final Binary expr);
+
         R visitGroupingExpr(final Grouping expr);
+
         R visitLiteralExpr(final Literal expr);
+
         R visitUnaryExpr(final Unary expr);
+
         R visitTernaryExpr(final Ternary expr);
     }
 
@@ -25,7 +29,7 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept (final Visitor<R> visitor) {
+        <R> R accept(final Visitor<R> visitor) {
             return visitor.visitBinaryExpr(this);
         }
     }
@@ -38,7 +42,7 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept (final Visitor<R> visitor) {
+        <R> R accept(final Visitor<R> visitor) {
             return visitor.visitGroupingExpr(this);
         }
     }
@@ -51,7 +55,7 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept (final Visitor<R> visitor) {
+        <R> R accept(final Visitor<R> visitor) {
             return visitor.visitLiteralExpr(this);
         }
     }
@@ -66,7 +70,7 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept (final Visitor<R> visitor) {
+        <R> R accept(final Visitor<R> visitor) {
             return visitor.visitUnaryExpr(this);
         }
     }
@@ -83,7 +87,7 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept (final Visitor<R> visitor) {
+        <R> R accept(final Visitor<R> visitor) {
             return visitor.visitTernaryExpr(this);
         }
     }

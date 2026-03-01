@@ -24,7 +24,7 @@ public class RpnPrinter implements Visitor<String> {
 
     @Override
     public String visitLiteralExpr(final Literal expr) {
-        if(expr.value == null) return "nil";
+        if (expr.value == null) return "nil";
         return expr.value.toString();
     }
 
@@ -36,13 +36,14 @@ public class RpnPrinter implements Visitor<String> {
     @Override
     public String visitTernaryExpr(Ternary expr) {
         final String ternary = String.join(" ",
-                expr.cond.accept(this),
-                expr.thenBranch.accept(this),
-                expr.elseBranch.accept(this)
+                                           expr.cond.accept(this),
+                                           expr.thenBranch.accept(this),
+                                           expr.elseBranch.accept(this)
         );
 
         return ternary + " ?:";
     }
+
     public static void main(String[] args) {
         final Expr comma = new Binary(
                 new Binary(
@@ -59,21 +60,21 @@ public class RpnPrinter implements Visitor<String> {
         );
 
         final Expr expr = new Binary(
-            new Grouping(
-                  new Binary(
-                        new Literal(1),
-                        new Token(TokenType.PLUS, "+", null, 1),
-                        new Literal(2)
-                  )
-            ),
-            new Token(TokenType.STAR, "*", null, 1),
-            new Grouping(
-                  new Binary(
-                          new Literal(4),
-                          new Token(TokenType.MINUS, "-", null, 1),
-                          new Literal(3)
-                  )
-            )
+                new Grouping(
+                        new Binary(
+                                new Literal(1),
+                                new Token(TokenType.PLUS, "+", null, 1),
+                                new Literal(2)
+                        )
+                ),
+                new Token(TokenType.STAR, "*", null, 1),
+                new Grouping(
+                        new Binary(
+                                new Literal(4),
+                                new Token(TokenType.MINUS, "-", null, 1),
+                                new Literal(3)
+                        )
+                )
         );
 
         System.out.println(new RpnPrinter().print(comma));

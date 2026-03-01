@@ -11,7 +11,8 @@ import static net.v1sion.lox.TokenType.*;
  **/
 
 public class Parser {
-    private static class ParseError extends RuntimeException {}
+    private static class ParseError extends RuntimeException {
+    }
 
     private final List<Token> tokens;
     private int current;
@@ -35,9 +36,9 @@ public class Parser {
     private Expr comma() {
         Expr expr = ternary();
 
-        while(match(COMMA)) {
+        while (match(COMMA)) {
             final Token operator = previous();
-            Expr right = equality();
+            final Expr right = ternary();
             expr = new Expr.Binary(expr, operator, right);
         }
 
@@ -45,20 +46,20 @@ public class Parser {
     }
 
     private Expr ternary() {
-        Expr expr = equality();
+        final Expr expr = equality();
 
-        if(!match(QUESTION_MARK)) return expr;
+        if (!match(QUESTION_MARK)) return expr;
 
-        Expr thenBranch = expression();
+        final Expr thenBranch = expression();
         consume(COLON, "Expect ':' in ternary operator");
-        Expr elseBranch = ternary();
+        final Expr elseBranch = ternary();
 
         return new Expr.Ternary(expr, thenBranch, elseBranch);
     }
 
     private Expr equality() {
         Expr expr = comparison();
-        while(match(BANG_EQUAL, EQUAL_EQUAL)) {
+        while (match(BANG_EQUAL, EQUAL_EQUAL)) {
             final Token operator = previous();
             final Expr right = comparison();
             expr = new Expr.Binary(expr, operator, right);
@@ -70,7 +71,7 @@ public class Parser {
     private Expr comparison() {
         Expr expr = term();
 
-        while(match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+        while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
             final Token operator = previous();
             final Expr right = term();
             expr = new Expr.Binary(expr, operator, right);
@@ -82,7 +83,7 @@ public class Parser {
     private Expr term() {
         Expr expr = factor();
 
-        while(match(MINUS, PLUS)) {
+        while (match(MINUS, PLUS)) {
             final Token operator = previous();
             final Expr right = factor();
             expr = new Expr.Binary(expr, operator, right);
@@ -94,7 +95,7 @@ public class Parser {
     private Expr factor() {
         Expr expr = unary();
 
-        while(match(SLASH, STAR)) {
+        while (match(SLASH, STAR)) {
             final Token operator = previous();
             final Expr right = unary();
             expr = new Expr.Binary(expr, operator, right);
@@ -104,7 +105,7 @@ public class Parser {
     }
 
     private Expr unary() {
-        if(!match(BANG, MINUS)) return primary();
+        if (!match(BANG, MINUS)) return primary();
 
         final Token operator = previous();
         final Expr right = unary();
@@ -112,37 +113,37 @@ public class Parser {
     }
 
     private Expr primary() {
-        if(match(FALSE)) return new Expr.Literal(false);
-        if(match(TRUE))  return new Expr.Literal(true);
-        if(match(NIL))   return new Expr.Literal(null);
+        if (match(FALSE)) return new Expr.Literal(false);
+        if (match(TRUE))  return new Expr.Literal(true);
+        if (match(NIL))   return new Expr.Literal(null);
 
-        if(match(NUMBER, STRING)) return new Expr.Literal(previous().literal);
+        if (match(NUMBER, STRING)) return new Expr.Literal(previous().literal);
 
-        if(match(LEFT_PAREN)) {
+        if (match(LEFT_PAREN)) {
             final Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
 
-        if(match(BANG_EQUAL, EQUAL_EQUAL)) {
+        if (match(BANG_EQUAL, EQUAL_EQUAL)) {
             error(previous(), "Missing left hand operand");
             equality();
             return null;
         }
 
-        if(match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+        if (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
             error(previous(), "Missing left hand operand");
             comparison();
             return null;
         }
 
-        if(match(PLUS)) {
+        if (match(PLUS)) {
             error(previous(), "Missing left hand operand");
             term();
             return null;
         }
 
-        if(match(STAR, SLASH)) {
+        if (match(STAR, SLASH)) {
             error(previous(), "Missing left hand operand");
             factor();
             return null;
@@ -152,8 +153,8 @@ public class Parser {
     }
 
     private boolean match(final TokenType... types) {
-        for(final TokenType type : types) {
-            if(check(type)) {
+        for (final TokenType type : types) {
+            if (check(type)) {
                 advance();
                 return true;
             }
@@ -163,13 +164,13 @@ public class Parser {
     }
 
     private Token consume(final TokenType type, final String message) {
-        if(check(type)) return advance();
+        if (check(type)) return advance();
 
         throw error(peek(), message);
     }
 
     private boolean check(final TokenType type) {
-        if(isAtEnd()) return false;
+        if (isAtEnd()) return false;
         return peek().type == type;
     }
 
@@ -197,11 +198,13 @@ public class Parser {
 
     private void synchronize() {
         advance();
-        while(!isAtEnd()) {
-            if(previous().type == SEMICOLON) return;
+        while (!isAtEnd()) {
+            if (previous().type == SEMICOLON) return;
 
             switch (peek().type) {
-                case CLASS, FOR, FUN, IF, PRINT, RETURN, VAR, WHILE -> {return;}
+                case CLASS, FOR, FUN, IF, PRINT, RETURN, VAR, WHILE -> {
+                    return;
+                }
             }
         }
 
