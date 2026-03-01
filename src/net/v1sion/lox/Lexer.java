@@ -178,12 +178,8 @@ public class Lexer {
             }
         }
 
-        if(isAtEnd()) {
-            Lox.error(line, "Unterminated multiline comment.");
-            return;
-        }
+        if(isAtEnd()) Lox.error(line, "Unterminated multiline comment.");
     }
-
 
     // Normal multiline comments, without nesting
     private void multilineComment() {
