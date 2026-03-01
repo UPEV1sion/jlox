@@ -49,6 +49,7 @@ public class Interpreter implements Visitor<Object> {
                 checkNumberOperands(expr.operator, left, right);
                 yield (double)left * (double)right;
             }
+            case COMMA -> right;
             default    -> null;
         };
     }
