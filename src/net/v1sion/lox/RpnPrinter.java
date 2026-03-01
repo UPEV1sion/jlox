@@ -1,10 +1,11 @@
 package net.v1sion.lox;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static net.v1sion.lox.Expr.*;
+
+/**
+ * @author Emanuel Schäffer
+ * at 22.02.26
+ **/
 
 public class RpnPrinter implements Visitor<String> {
 

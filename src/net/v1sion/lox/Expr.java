@@ -1,23 +1,22 @@
 package net.v1sion.lox;
 
-import java.util.List;
+/**
+ * @author Emanuel Schäffer
+ * at 21.02.26, revision 01.03.2026
+ **/
 
-abstract class Expr {
+public abstract class Expr {
     abstract <R> R accept(final Visitor<R> visitor);
 
-    interface Visitor<R> {
+    public interface Visitor<R> {
         R visitBinaryExpr(final Binary expr);
-
         R visitGroupingExpr(final Grouping expr);
-
         R visitLiteralExpr(final Literal expr);
-
         R visitUnaryExpr(final Unary expr);
-
         R visitTernaryExpr(final Ternary expr);
     }
 
-    static class Binary extends Expr {
+    public static class Binary extends Expr {
         final Expr left;
         final Token operator;
         final Expr right;
@@ -29,12 +28,12 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept(final Visitor<R> visitor) {
+        <R> R accept (final Visitor<R> visitor) {
             return visitor.visitBinaryExpr(this);
         }
     }
 
-    static class Grouping extends Expr {
+    public static class Grouping extends Expr {
         final Expr expression;
 
         Grouping(Expr expression) {
@@ -42,12 +41,12 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept(final Visitor<R> visitor) {
+        <R> R accept (final Visitor<R> visitor) {
             return visitor.visitGroupingExpr(this);
         }
     }
 
-    static class Literal extends Expr {
+    public static class Literal extends Expr {
         final Object value;
 
         Literal(Object value) {
@@ -55,12 +54,12 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept(final Visitor<R> visitor) {
+        <R> R accept (final Visitor<R> visitor) {
             return visitor.visitLiteralExpr(this);
         }
     }
 
-    static class Unary extends Expr {
+    public static class Unary extends Expr {
         final Token operator;
         final Expr right;
 
@@ -70,12 +69,12 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept(final Visitor<R> visitor) {
+        <R> R accept (final Visitor<R> visitor) {
             return visitor.visitUnaryExpr(this);
         }
     }
 
-    static class Ternary extends Expr {
+    public static class Ternary extends Expr {
         final Expr cond;
         final Expr thenBranch;
         final Expr elseBranch;
@@ -87,7 +86,7 @@ abstract class Expr {
         }
 
         @Override
-        <R> R accept(final Visitor<R> visitor) {
+        <R> R accept (final Visitor<R> visitor) {
             return visitor.visitTernaryExpr(this);
         }
     }

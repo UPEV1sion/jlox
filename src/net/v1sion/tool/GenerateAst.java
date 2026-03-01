@@ -3,7 +3,10 @@ package net.v1sion.tool;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,9 +42,9 @@ public class GenerateAst {
 
         writer.println("package net.v1sion.lox;");
         writer.println();
-        writer.println("import java.util.List;");
+        defineHeader(writer);
         writer.println();
-        writer.println("abstract class " + baseName + " {");
+        writer.println("public abstract class " + baseName + " {");
 
         writer.println(indent(1) + "abstract <R> R accept(final Visitor<R> visitor);");
         writer.println();
@@ -58,8 +61,16 @@ public class GenerateAst {
         writer.close();
     }
 
+    private static void defineHeader(final PrintWriter writer) {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        writer.println("/**");
+        writer.println(" * @author Emanuel Schäffer");
+        writer.println(" * at 21.02.26, revision " + LocalDate.now().format(formatter));
+        writer.println(" **/");
+    }
+
     private static void defineVisitor(final PrintWriter writer, final String baseName, final List<String> types) {
-        writer.println(indent(1) + "interface Visitor<R> {");
+        writer.println(indent(1) + "public interface Visitor<R> {");
         for (final String type : types) {
             final String typeName = type.split(":")[0].trim();
             writer.println(indent(2) + "R visit" + typeName + baseName +
@@ -75,7 +86,7 @@ public class GenerateAst {
             final String fieldList
     ) {
         writer.println();
-        writer.println(indent(1) + "static class " + className + " extends " + baseName + " {");
+        writer.println(indent(1) + "public static class " + className + " extends " + baseName + " {");
 
         final String[] fields = fieldList.split(", ");
 

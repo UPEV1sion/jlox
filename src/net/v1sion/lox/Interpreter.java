@@ -2,6 +2,11 @@ package net.v1sion.lox;
 
 import static net.v1sion.lox.Expr.*;
 
+/**
+ * @author Emanuel Schäffer
+ * at 28.02.26
+ **/
+
 public class Interpreter implements Visitor<Object> {
     @Override
     public Object visitBinaryExpr(final Binary expr) {
