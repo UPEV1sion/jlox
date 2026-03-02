@@ -103,6 +103,7 @@ public class Interpreter implements Visitor<Object> {
 
     private boolean isTruthy(final Object object) {
         if (object instanceof final Boolean b) return b;
+        if (object instanceof final Double d) return d != 0.0;
         return object != null;
     }
 
