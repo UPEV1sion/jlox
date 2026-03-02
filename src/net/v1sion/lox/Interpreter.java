@@ -38,11 +38,12 @@ public class Interpreter implements Visitor<Object> {
             }
             case PLUS  -> {
                 if(left instanceof final Double lhs && right instanceof final Double rhs) yield lhs + rhs;
-                if(left instanceof final String lhs && right instanceof final String rhs) yield lhs + rhs;
+                if(left instanceof String || right instanceof String) yield stringify(left) + stringify(right);
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
             }
             case SLASH -> {
                 checkNumberOperands(expr.operator, left, right);
+                if(right instanceof final Double rhs && rhs == 0.0) throw new RuntimeError(expr.operator, "Division by zero error.");
                 yield (double)left / (double)right;
             }
             case STAR  -> {
@@ -103,7 +104,7 @@ public class Interpreter implements Visitor<Object> {
 
     private boolean isTruthy(final Object object) {
         if (object instanceof final Boolean b) return b;
-        if (object instanceof final Double d) return d != 0.0;
+        if (object instanceof final Double d)  return d != 0.0;
         return object != null;
     }
 
@@ -114,7 +115,7 @@ public class Interpreter implements Visitor<Object> {
     }
 
     private String stringify(final Object object) {
-        if(object == null) return "";
+        if(object == null) return "nil";
 
         if(object instanceof Double) {
             String text = object.toString();
