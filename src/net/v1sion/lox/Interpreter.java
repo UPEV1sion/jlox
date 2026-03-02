@@ -1,13 +1,16 @@
 package net.v1sion.lox;
 
+import java.util.List;
+
 import static net.v1sion.lox.Expr.*;
+import static net.v1sion.lox.Stmt.*;
 
 /**
  * @author Emanuel Schäffer
  * at 28.02.26
  **/
 
-public class Interpreter implements Visitor<Object> {
+public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitBinaryExpr(final Binary expr) {
         final Object left  = evaluate(expr.left);
@@ -83,10 +86,11 @@ public class Interpreter implements Visitor<Object> {
         return isTruthy(evaluate(expr.cond)) ? evaluate(expr.thenBranch) : evaluate(expr.elseBranch);
     }
 
-    void interpret(final Expr expr) {
+    void interpret(final List<Stmt> statements) {
         try {
-            final Object value = evaluate(expr);
-            System.out.println(stringify(value));
+            for (final Stmt statement : statements) {
+                execute(statement);
+            }
         } catch (final RuntimeError error) {
             Lox.runtimeError(error);
         }
@@ -130,5 +134,22 @@ public class Interpreter implements Visitor<Object> {
 
     private Object evaluate(final Expr expr) {
         return expr.accept(this);
+    }
+
+    private void execute(final Stmt statement) {
+        statement.accept(this);
+    }
+
+    @Override
+    public Void visitExpressionStmt(final Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(final Print stmt) {
+        final Object value = evaluate(stmt.expression);
+        System.out.println(stringify(value));
+        return null;
     }
 }

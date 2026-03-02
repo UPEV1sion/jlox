@@ -2,7 +2,7 @@ package net.v1sion.lox;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 01.03.2026
+ * at 21.02.26, revision 02.03.2026
  **/
 
 public abstract class Expr {
