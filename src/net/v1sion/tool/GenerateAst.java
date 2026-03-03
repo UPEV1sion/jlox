@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,27 +41,27 @@ public class GenerateAst {
             final String baseName,
             final List<String> types) throws IOException {
         final String path = outputDir + "/" + baseName + ".java";
-        final PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8);
 
-        writer.println("package net.v1sion.lox;");
-        writer.println();
-        defineHeader(writer);
-        writer.println();
-        writer.println("public abstract class " + baseName + " {");
+        try (final PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8)) {
+            writer.println("package net.v1sion.lox;");
+            writer.println();
+            defineHeader(writer);
+            writer.println();
+            writer.println("public abstract class " + baseName + " {");
 
-        writer.println(indent(1) + "abstract <R> R accept(final Visitor<R> visitor);");
-        writer.println();
+            writer.println(indent(1) + "abstract <R> R accept(final Visitor<R> visitor);");
+            writer.println();
 
-        defineVisitor(writer, baseName, types);
+            defineVisitor(writer, baseName, types);
 
-        for (final String type : types) {
-            final String className = type.split(":")[0].trim();
-            final String fields = type.split(":")[1].trim();
-            defineType(writer, baseName, className, fields);
+            for (final String type : types) {
+                final String className = type.split(":")[0].trim();
+                final String fields = type.split(":")[1].trim();
+                defineType(writer, baseName, className, fields);
+            }
+
+            writer.println("}");
         }
-
-        writer.println("}");
-        writer.close();
     }
 
     private static void defineHeader(final PrintWriter writer) {
