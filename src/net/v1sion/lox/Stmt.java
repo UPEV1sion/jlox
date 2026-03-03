@@ -2,40 +2,39 @@ package net.v1sion.lox;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 02.03.2026
+ * at 21.02.26, revision 03.03.2026
  **/
 
-public abstract class Stmt {
-    abstract <R> R accept(final Visitor<R> visitor);
+public interface Stmt {
+    <R> R accept(final Visitor<R> visitor);
 
-    public interface Visitor<R> {
+    interface Visitor<R> {
         R visitExpressionStmt(final Expression stmt);
         R visitPrintStmt(final Print stmt);
+        R visitVarStmt(final Var stmt);
     }
 
-    public static class Expression extends Stmt {
-        final Expr expression;
-
-        Expression(Expr expression) {
-            this.expression = expression;
-        }
+    record Expression(Expr expression) implements Stmt {
 
         @Override
-        <R> R accept (final Visitor<R> visitor) {
+        public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitExpressionStmt(this);
         }
     }
 
-    public static class Print extends Stmt {
-        final Expr expression;
-
-        Print(Expr expression) {
-            this.expression = expression;
-        }
+    record Print(Expr expression) implements Stmt {
 
         @Override
-        <R> R accept (final Visitor<R> visitor) {
+        public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitPrintStmt(this);
+        }
+    }
+
+    record Var(Token name, Expr initializer) implements Stmt {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitVarStmt(this);
         }
     }
 }

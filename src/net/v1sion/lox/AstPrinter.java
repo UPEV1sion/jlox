@@ -14,31 +14,31 @@ public class AstPrinter implements Visitor<String> {
 
     @Override
     public String visitBinaryExpr(final Binary expr) {
-        return parenthesize(expr.operator.lexeme, expr.left, expr.right);
+        return parenthesize(expr.operator().lexeme(), expr.left(), expr.right());
     }
 
     @Override
     public String visitGroupingExpr(final Grouping expr) {
-        return parenthesize("group", expr.expression);
+        return parenthesize("group", expr.expression());
     }
 
     @Override
     public String visitLiteralExpr(final Literal expr) {
-        if (expr.value == null) return "nil";
-        return expr.value.toString();
+        if (expr.value() == null) return "nil";
+        return expr.value().toString();
     }
 
     @Override
     public String visitUnaryExpr(final Unary expr) {
-        return parenthesize(expr.operator.lexeme, expr.right);
+        return parenthesize(expr.operator().lexeme(), expr.right());
     }
 
     @Override
-    public String visitTernaryExpr(Ternary expr) {
-        return parenthesize("if", expr.cond, expr.thenBranch, expr.elseBranch);
+    public String visitTernaryExpr(final Ternary expr) {
+        return parenthesize("if", expr.cond(), expr.thenBranch(), expr.elseBranch());
     }
 
-    private String parenthesize(final String name, Expr... exprs) {
+    private String parenthesize(final String name, final Expr... exprs) {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("(").append(name);
@@ -51,7 +51,7 @@ public class AstPrinter implements Visitor<String> {
         return builder.toString();
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final Expr comma = new Binary(
                 new Binary(
                         new Literal(1),

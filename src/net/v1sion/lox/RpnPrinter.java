@@ -15,31 +15,31 @@ public class RpnPrinter implements Visitor<String> {
 
     @Override
     public String visitBinaryExpr(final Binary expr) {
-        return expr.left.accept(this) + " " + expr.right.accept(this) + " " + expr.operator.lexeme;
+        return expr.left().accept(this) + " " + expr.right().accept(this) + " " + expr.operator().lexeme();
     }
 
     @Override
     public String visitGroupingExpr(final Grouping expr) {
-        return expr.expression.accept(this);
+        return expr.expression().accept(this);
     }
 
     @Override
     public String visitLiteralExpr(final Literal expr) {
-        if (expr.value == null) return "nil";
-        return expr.value.toString();
+        if (expr.value() == null) return "nil";
+        return expr.value().toString();
     }
 
     @Override
     public String visitUnaryExpr(final Unary expr) {
-        return expr.operator.lexeme + expr.right.accept(this);
+        return expr.operator().lexeme() + expr.right().accept(this);
     }
 
     @Override
-    public String visitTernaryExpr(Ternary expr) {
+    public String visitTernaryExpr(final Ternary expr) {
         final String ternary = String.join(" ",
-                                           expr.cond.accept(this),
-                                           expr.thenBranch.accept(this),
-                                           expr.elseBranch.accept(this)
+                                           expr.cond().accept(this),
+                                           expr.thenBranch().accept(this),
+                                           expr.elseBranch().accept(this)
         );
 
         return ternary + " ?:";

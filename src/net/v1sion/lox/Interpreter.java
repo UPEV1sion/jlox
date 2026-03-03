@@ -13,44 +13,44 @@ import static net.v1sion.lox.Stmt.*;
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitBinaryExpr(final Binary expr) {
-        final Object left  = evaluate(expr.left);
-        final Object right = evaluate(expr.right);
+        final Object left  = evaluate(expr.left());
+        final Object right = evaluate(expr.right());
 
-        return switch (expr.operator.type) {
+        return switch (expr.operator().type()) {
             case GREATER       -> {
-                checkNumberOperands(expr.operator, left, right);
+                checkNumberOperands(expr.operator(), left, right);
                 yield (double)left > (double)right;
             }
             case GREATER_EQUAL -> {
-                checkNumberOperands(expr.operator, left, right);
+                checkNumberOperands(expr.operator(), left, right);
                 yield (double)left >= (double)right;
             }
             case LESS          -> {
-                checkNumberOperands(expr.operator, left, right);
+                checkNumberOperands(expr.operator(), left, right);
                 yield (double)left < (double)right;
             }
             case LESS_EQUAL    -> {
-                checkNumberOperands(expr.operator, left, right);
+                checkNumberOperands(expr.operator(), left, right);
                 yield (double)left <= (double)right;
             }
             case BANG_EQUAL    -> !isEqual(left, right);
             case EQUAL_EQUAL   -> isEqual(left, right);
             case MINUS         -> {
-                checkNumberOperands(expr.operator, left, right);
+                checkNumberOperands(expr.operator(), left, right);
                 yield (double)left - (double)right;
             }
             case PLUS  -> {
                 if(left instanceof final Double lhs && right instanceof final Double rhs) yield lhs + rhs;
                 if(left instanceof String || right instanceof String) yield stringify(left) + stringify(right);
-                throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
+                throw new RuntimeError(expr.operator(), "Operands must be two numbers or two strings.");
             }
             case SLASH -> {
-                checkNumberOperands(expr.operator, left, right);
-                if(right instanceof final Double rhs && rhs == 0.0) throw new RuntimeError(expr.operator, "Division by zero error.");
+                checkNumberOperands(expr.operator(), left, right);
+                if(right instanceof final Double rhs && rhs == 0.0) throw new RuntimeError(expr.operator(), "Division by zero error.");
                 yield (double)left / (double)right;
             }
             case STAR  -> {
-                checkNumberOperands(expr.operator, left, right);
+                checkNumberOperands(expr.operator(), left, right);
                 yield (double)left * (double)right;
             }
             case COMMA -> right;
@@ -60,21 +60,21 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitGroupingExpr(final Grouping expr) {
-        return evaluate(expr.expression);
+        return evaluate(expr.expression());
     }
 
     @Override
     public Object visitLiteralExpr(final Literal expr) {
-        return expr.value;
+        return expr.value();
     }
 
     @Override
     public Object visitUnaryExpr(final Unary expr) {
-        final Object right = evaluate(expr.right);
-        return switch (expr.operator.type) {
+        final Object right = evaluate(expr.right());
+        return switch (expr.operator().type()) {
             case BANG  -> !isTruthy(right);
             case MINUS -> {
-                checkNumberOperand(expr.operator, right);
+                checkNumberOperand(expr.operator(), right);
                 yield -(double)right;
             }
             default    -> null;
@@ -83,7 +83,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitTernaryExpr(final Ternary expr) {
-        return isTruthy(evaluate(expr.cond)) ? evaluate(expr.thenBranch) : evaluate(expr.elseBranch);
+        return isTruthy(evaluate(expr.cond())) ? evaluate(expr.thenBranch()) : evaluate(expr.elseBranch());
     }
 
     void interpret(final List<Stmt> statements) {
@@ -142,14 +142,19 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitExpressionStmt(final Expression stmt) {
-        evaluate(stmt.expression);
+        evaluate(stmt.expression());
         return null;
     }
 
     @Override
     public Void visitPrintStmt(final Print stmt) {
-        final Object value = evaluate(stmt.expression);
+        final Object value = evaluate(stmt.expression());
         System.out.println(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(final Var stmt) {
         return null;
     }
 }
