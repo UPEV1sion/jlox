@@ -38,6 +38,11 @@ public class AstPrinter implements Visitor<String> {
         return parenthesize("if", expr.cond(), expr.thenBranch(), expr.elseBranch());
     }
 
+    @Override
+    public String visitVariableExpr(final Variable expr) {
+        return expr.accept(this);
+    }
+
     private String parenthesize(final String name, final Expr... exprs) {
         final StringBuilder builder = new StringBuilder();
 

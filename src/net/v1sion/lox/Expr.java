@@ -14,6 +14,7 @@ public interface Expr {
         R visitLiteralExpr(final Literal expr);
         R visitUnaryExpr(final Unary expr);
         R visitTernaryExpr(final Ternary expr);
+        R visitVariableExpr(final Variable expr);
     }
 
     record Binary(Expr left, Token operator, Expr right) implements Expr {
@@ -53,6 +54,14 @@ public interface Expr {
         @Override
         public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitTernaryExpr(this);
+        }
+    }
+
+    record Variable(Token name) implements Expr {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitVariableExpr(this);
         }
     }
 }

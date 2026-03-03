@@ -86,6 +86,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return isTruthy(evaluate(expr.cond())) ? evaluate(expr.thenBranch()) : evaluate(expr.elseBranch());
     }
 
+    @Override
+    public Object visitVariableExpr(Variable expr) {
+        return null;
+    }
+
     void interpret(final List<Stmt> statements) {
         try {
             for (final Stmt statement : statements) {

@@ -16,7 +16,7 @@ import java.util.List;
 public class GenerateAst {
     private static final int TAB_SIZE = 4;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
         if (args.length != 1) {
             System.err.println("Usage: generate_ast <output directory>");
             System.exit(64);
@@ -28,7 +28,8 @@ public class GenerateAst {
                 "Grouping : Expr expression",
                 "Literal  : Object value",
                 "Unary    : Token operator, Expr right",
-                "Ternary  : Expr cond, Expr thenBranch, Expr elseBranch"
+                "Ternary  : Expr cond, Expr thenBranch, Expr elseBranch",
+                "Variable : Token name"
         ));
 
         defineAst(outputDir, "Stmt", List.of(
