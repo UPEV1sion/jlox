@@ -23,7 +23,7 @@ public class GenerateAst {
         }
 
         final String outputDir = args[0];
-        defineAst(outputDir, "Expr", Arrays.asList(
+        defineAst(outputDir, "Expr", List.of(
                 "Binary   : Expr left, Token operator, Expr right",
                 "Grouping : Expr expression",
                 "Literal  : Object value",
@@ -31,7 +31,7 @@ public class GenerateAst {
                 "Ternary  : Expr cond, Expr thenBranch, Expr elseBranch"
         ));
 
-        defineAst(outputDir, "Stmt", Arrays.asList(
+        defineAst(outputDir, "Stmt", List.of(
                 "Expression : Expr expression",
                 "Print      : Expr expression"
         ));
