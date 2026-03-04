@@ -11,6 +11,8 @@ import static net.v1sion.lox.Stmt.*;
  **/
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+    private final Environment environment = new Environment();
+
     @Override
     public Object visitBinaryExpr(final Binary expr) {
         final Object left  = evaluate(expr.left());
@@ -87,8 +89,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
-    public Object visitVariableExpr(Variable expr) {
-        return null;
+    public Object visitVariableExpr(final Variable expr) {
+        return environment.get(expr.name()); // TODO maybe throw if no variable is present
     }
 
     void interpret(final List<Stmt> statements) {
@@ -148,6 +150,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitExpressionStmt(final Expression stmt) {
         evaluate(stmt.expression());
+
         return null;
     }
 
@@ -155,11 +158,23 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitPrintStmt(final Print stmt) {
         final Object value = evaluate(stmt.expression());
         System.out.println(stringify(value));
+
         return null;
     }
 
     @Override
     public Void visitVarStmt(final Var stmt) {
+        final Object value = stmt.initializer() != null ? evaluate(stmt.initializer()) : null;
+        environment.define(stmt.name().lexeme(), value);
+
         return null;
+    }
+
+    @Override
+    public Object visitAssignExpr(final Assign expr) {
+        final Object value = evaluate(expr.value());
+        environment.assign(expr.name(), value);
+
+        return value;
     }
 }

@@ -50,6 +50,7 @@ public class Parser {
     private Stmt printStatement() {
         final Expr value = expression();
         consume(SEMICOLON, "Expect ';' after expression");
+
         return new Stmt.Print(value);
     }
 
@@ -58,12 +59,14 @@ public class Parser {
 
         final Expr initializer = match(EQUAL) ? expression() : null;
         consume(SEMICOLON, "Expect ';' after variable declaration.");
+
         return new Stmt.Var(name, initializer);
     }
 
     private Stmt expressionStatement() {
         final Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression");
+
         return new Stmt.Print(expr);
     }
 
@@ -72,12 +75,27 @@ public class Parser {
     }
 
     private Expr comma() {
-        Expr expr = ternary();
+        Expr expr = assignment();
 
         while (match(COMMA)) {
             final Token operator = previous();
-            final Expr right = ternary();
+            final Expr right = assignment();
             expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr assignment() {
+        final Expr expr = ternary();
+
+        if(match(EQUAL)) {
+            final Token equals = previous();
+            final Expr value = assignment();
+
+            if(expr instanceof Expr.Variable(Token name)) return new Expr.Assign(name, value);
+
+            error(equals, "Invalid assignment target.");
         }
 
         return expr;

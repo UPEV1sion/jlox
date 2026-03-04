@@ -2,19 +2,28 @@ package net.v1sion.lox;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 03.03.2026
+ * at 21.02.26, revision 04.03.2026
  **/
 
 public interface Expr {
     <R> R accept(final Visitor<R> visitor);
 
     interface Visitor<R> {
+        R visitAssignExpr(final Assign expr);
         R visitBinaryExpr(final Binary expr);
         R visitGroupingExpr(final Grouping expr);
         R visitLiteralExpr(final Literal expr);
         R visitUnaryExpr(final Unary expr);
         R visitTernaryExpr(final Ternary expr);
         R visitVariableExpr(final Variable expr);
+    }
+
+    record Assign(Token name, Expr value) implements Expr {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitAssignExpr(this);
+        }
     }
 
     record Binary(Expr left, Token operator, Expr right) implements Expr {

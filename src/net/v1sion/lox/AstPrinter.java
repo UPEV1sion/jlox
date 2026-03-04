@@ -13,6 +13,11 @@ public class AstPrinter implements Visitor<String> {
     }
 
     @Override
+    public String visitAssignExpr(Assign expr) {
+        return "";
+    }
+
+    @Override
     public String visitBinaryExpr(final Binary expr) {
         return parenthesize(expr.operator().lexeme(), expr.left(), expr.right());
     }

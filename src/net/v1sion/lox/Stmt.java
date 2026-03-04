@@ -2,7 +2,7 @@ package net.v1sion.lox;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 03.03.2026
+ * at 21.02.26, revision 04.03.2026
  **/
 
 public interface Stmt {
