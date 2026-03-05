@@ -41,17 +41,28 @@ public class Lox {
         final InputStreamReader input = new InputStreamReader(System.in);
         final BufferedReader reader = new BufferedReader(input);
         for (; ; ) {
-            System.out.print("> ");
-            final String line = reader.readLine();
-            if (line == null) break;
-            run(line);
             hadError = false;
+            System.out.print("> ");
+            final Lexer lexer = new Lexer(reader.readLine());
+            final List<Token> tokens = lexer.lexTokens();
+
+            final Parser parser = new Parser(tokens);
+            final Object syntax = parser.parseRepl();
+
+            if(hadError) continue;
+
+            if(syntax instanceof List) {
+                interpreter.interpret((List<Stmt>) syntax);
+            } else if(syntax instanceof final Expr expression) {
+                final String result = interpreter.interpret(expression);
+                if(result != null) System.out.println("= " + result);
+            }
         }
     }
 
     private static void run(final String source) {
         final Lexer scanner = new Lexer(source);
-        final List<Token> tokens = scanner.scanTokens();
+        final List<Token> tokens = scanner.lexTokens();
         final Parser parser = new Parser(tokens);
         final List<Stmt> statements = parser.parse();
 

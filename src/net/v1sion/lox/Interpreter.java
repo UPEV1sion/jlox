@@ -106,6 +106,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
     }
 
+    String interpret(final Expr expression) {
+        try {
+            final Object value = evaluate(expression);
+            return stringify(value);
+        } catch (final RuntimeError error) {
+            Lox.runtimeError(error);
+            return null;
+        }
+    }
+
     private void checkNumberOperand(final Token operator, final Object operand) {
         if(operand instanceof Double) return;
         throw new RuntimeError(operator, "Operand must be a number.");

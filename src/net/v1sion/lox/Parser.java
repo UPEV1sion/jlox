@@ -11,6 +11,9 @@ import static net.v1sion.lox.TokenType.*;
  **/
 
 public class Parser {
+    private boolean allowExpression;
+    private boolean foundExpression;
+
     private static class ParseError extends RuntimeException {
     }
 
@@ -25,6 +28,23 @@ public class Parser {
         final List<Stmt> statements = new ArrayList<>();
         while(!isAtEnd()) {
             statements.add(declaration());
+        }
+
+        return statements;
+    }
+
+    Object parseRepl() {
+        allowExpression = true;
+        final List<Stmt> statements = new ArrayList<>();
+        while(!isAtEnd()) {
+            statements.add(declaration());
+
+            if(foundExpression) {
+                final Stmt last = statements.getLast();
+                return ((Stmt.Expression) last).expression();
+            }
+
+            allowExpression = false;
         }
 
         return statements;
@@ -66,7 +86,12 @@ public class Parser {
 
     private Stmt expressionStatement() {
         final Expr expr = expression();
-        consume(SEMICOLON, "Expect ';' after expression");
+
+        if(allowExpression && isAtEnd()) {
+            foundExpression = true;
+        } else {
+            consume(SEMICOLON, "Expect ';' after expression");
+        }
 
         return new Stmt.Expression(expr);
     }

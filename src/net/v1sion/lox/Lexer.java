@@ -45,16 +45,16 @@ public class Lexer {
         this.source = source;
     }
 
-    List<Token> scanTokens() {
+    List<Token> lexTokens() {
         while(!isAtEnd()) {
             start = current;
-            scanToken();
+            lexToken();
         }
         tokens.add(new Token(EOF, "", null, line));
         return tokens;
     }
 
-    private void scanToken() {
+    private void lexToken() {
         final char c = advance();
         switch(c) {
             case '(' -> addToken(LEFT_PAREN);
