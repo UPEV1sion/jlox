@@ -67,7 +67,7 @@ public class Parser {
         final Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression");
 
-        return new Stmt.Print(expr);
+        return new Stmt.Expression(expr);
     }
 
     private Expr expression() {
