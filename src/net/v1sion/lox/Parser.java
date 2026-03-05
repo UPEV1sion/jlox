@@ -264,8 +264,8 @@ public class Parser {
                     return;
                 }
             }
-        }
 
-        advance();
+            advance();
+        }
     }
 }
