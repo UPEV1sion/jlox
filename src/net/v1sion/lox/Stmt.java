@@ -1,17 +1,28 @@
 package net.v1sion.lox;
 
+import java.util.List;
+
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 04.03.2026
+ * at 21.02.26, revision 05.03.2026
  **/
 
 public interface Stmt {
     <R> R accept(final Visitor<R> visitor);
 
     interface Visitor<R> {
+        R visitBlockStmt(final Block stmt);
         R visitExpressionStmt(final Expression stmt);
         R visitPrintStmt(final Print stmt);
         R visitVarStmt(final Var stmt);
+    }
+
+    record Block(List<Stmt> statements) implements Stmt {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitBlockStmt(this);
+        }
     }
 
     record Expression(Expr expression) implements Stmt {

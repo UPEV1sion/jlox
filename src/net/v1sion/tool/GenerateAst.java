@@ -33,6 +33,7 @@ public class GenerateAst {
         ));
 
         defineAst(outputDir, "Stmt", List.of(
+                "Block      : List<Stmt> statements",
                 "Expression : Expr expression",
                 "Print      : Expr expression",
                 "Var        : Token name, Expr initializer"
@@ -47,6 +48,8 @@ public class GenerateAst {
 
         try (final PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8)) {
             writer.println("package net.v1sion.lox;");
+            writer.println();
+            writer.println("import java.util.List;");
             writer.println();
             defineHeader(writer);
             writer.println();

@@ -11,7 +11,7 @@ import static net.v1sion.lox.Stmt.*;
  **/
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
-    private final Environment environment = new Environment();
+    private Environment environment = new Environment();
 
     @Override
     public Object visitBinaryExpr(final Binary expr) {
@@ -145,6 +145,26 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private void execute(final Stmt statement) {
         statement.accept(this);
+    }
+
+    void executeBlock(final List<Stmt> statements, final Environment environment) {
+        final Environment previous = this.environment;
+
+        try {
+            this.environment = environment;
+
+            for(final Stmt statement : statements) {
+                execute(statement);
+            }
+        } finally {
+            this.environment = previous;
+        }
+    }
+
+    @Override
+    public Void visitBlockStmt(final Block stmt) {
+        executeBlock(stmt.statements(), new Environment(environment));
+        return null;
     }
 
     @Override

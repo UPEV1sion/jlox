@@ -14,7 +14,7 @@ public class RpnPrinter implements Visitor<String> {
     }
 
     @Override
-    public String visitAssignExpr(Assign expr) {
+    public String visitAssignExpr(final Assign expr) {
         return "";
     }
 
@@ -55,7 +55,7 @@ public class RpnPrinter implements Visitor<String> {
         return expr.name().lexeme();
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final Expr comma = new Binary(
                 new Binary(
                         new Literal(1),
