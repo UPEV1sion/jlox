@@ -83,7 +83,7 @@ public class Lox {
     }
 
     private static void report(final int line, final String where, final String message) {
-        System.err.println("[line " + line + "] Error " + where + ": " + message);
+        System.err.println("[line " + line + "] Error" + where + ": " + message);
         hadError = true;
     }
 
@@ -91,7 +91,7 @@ public class Lox {
         if (token.type() == TokenType.EOF) {
             report(token.line(), " at end", message);
         } else {
-            report(token.line(), " at'" + token.lexeme() + "'", message);
+            report(token.line(), " at '" + token.lexeme() + "'", message);
         }
     }
 }
