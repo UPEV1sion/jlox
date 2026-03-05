@@ -12,6 +12,7 @@ import static net.v1sion.lox.Stmt.*;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private Environment environment = new Environment();
+    private static final Object uninitialized = new Object();
 
     @Override
     public Object visitBinaryExpr(final Binary expr) {
@@ -90,7 +91,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(final Variable expr) {
-        return environment.get(expr.name()); // TODO maybe throw if no variable is present
+        final Object value = environment.get(expr.name());
+        if(value == uninitialized) throw new RuntimeError(expr.name(), "Variable must be initialized before use.");
+        return value;
     }
 
     void interpret(final List<Stmt> statements) {
@@ -184,7 +187,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitVarStmt(final Var stmt) {
-        final Object value = stmt.initializer() != null ? evaluate(stmt.initializer()) : null;
+        final Object value = stmt.initializer() != null ? evaluate(stmt.initializer()) : uninitialized;
         environment.define(stmt.name().lexeme(), value);
 
         return null;
