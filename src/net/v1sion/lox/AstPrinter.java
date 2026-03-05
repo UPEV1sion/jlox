@@ -7,6 +7,7 @@ import static net.v1sion.lox.Expr.*;
  * at 22.02.26
  **/
 
+// TODO
 public class AstPrinter implements Visitor<String> {
     String print(final Expr expr) {
         return expr.accept(this);
@@ -31,6 +32,11 @@ public class AstPrinter implements Visitor<String> {
     public String visitLiteralExpr(final Literal expr) {
         if (expr.value() == null) return "nil";
         return expr.value().toString();
+    }
+
+    @Override
+    public String visitLogicalExpr(final Logical expr) {
+        return "";
     }
 
     @Override

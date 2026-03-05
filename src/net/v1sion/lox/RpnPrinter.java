@@ -7,6 +7,7 @@ import static net.v1sion.lox.Expr.*;
  * at 22.02.26
  **/
 
+// TODO
 public class RpnPrinter implements Visitor<String> {
 
     String print(final Expr expr) {
@@ -32,6 +33,11 @@ public class RpnPrinter implements Visitor<String> {
     public String visitLiteralExpr(final Literal expr) {
         if (expr.value() == null) return "nil";
         return expr.value().toString();
+    }
+
+    @Override
+    public String visitLogicalExpr(final Logical expr) {
+        return "";
     }
 
     @Override
