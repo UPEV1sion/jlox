@@ -1,5 +1,7 @@
 package net.v1sion.lox;
 
+import java.util.List;
+
 /**
  * @author Emanuel Schäffer
  * at 21.02.26, revision 05.03.2026
@@ -13,6 +15,7 @@ public interface Expr {
         R visitBinaryExpr(final Binary expr);
         R visitGroupingExpr(final Grouping expr);
         R visitLiteralExpr(final Literal expr);
+        R visitLogicalExpr(final Logical expr);
         R visitUnaryExpr(final Unary expr);
         R visitTernaryExpr(final Ternary expr);
         R visitVariableExpr(final Variable expr);
@@ -47,6 +50,14 @@ public interface Expr {
         @Override
         public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitLiteralExpr(this);
+        }
+    }
+
+    record Logical(Expr left, Token operator, Expr right) implements Expr {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitLogicalExpr(this);
         }
     }
 

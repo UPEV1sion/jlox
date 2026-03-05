@@ -52,7 +52,9 @@ public class Lox {
             if(hadError) continue;
 
             if(syntax instanceof List) {
-                interpreter.interpret((List<Stmt>) syntax);
+                @SuppressWarnings("unchecked")
+                final List<Stmt> stmts = (List<Stmt>) syntax;
+                interpreter.interpret(stmts);
             } else if(syntax instanceof final Expr expression) {
                 final String result = interpreter.interpret(expression);
                 if(result != null) System.out.println("= " + result);

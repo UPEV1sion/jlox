@@ -13,6 +13,7 @@ public interface Stmt {
     interface Visitor<R> {
         R visitBlockStmt(final Block stmt);
         R visitExpressionStmt(final Expression stmt);
+        R visitIfStmt(final If stmt);
         R visitPrintStmt(final Print stmt);
         R visitVarStmt(final Var stmt);
     }
@@ -30,6 +31,14 @@ public interface Stmt {
         @Override
         public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitExpressionStmt(this);
+        }
+    }
+
+    record If(Expr condition, Stmt thenBranch, Stmt elseBranch) implements Stmt {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitIfStmt(this);
         }
     }
 
