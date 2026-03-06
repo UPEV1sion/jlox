@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 05.03.2026
+ * at 21.02.26, revision 06.03.2026
  **/
 
 public interface Expr {

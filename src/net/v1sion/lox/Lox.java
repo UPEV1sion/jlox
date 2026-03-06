@@ -1,5 +1,7 @@
 package net.v1sion.lox;
 
+import net.v1sion.lox.exceptions.RuntimeError;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -78,7 +80,7 @@ public class Lox {
     }
 
     static void runtimeError(final RuntimeError error) {
-        System.err.println(error.getMessage() + "\n[line " + error.token.line() + "]");
+        System.err.println(error.getMessage() + "\n[line " + error.getToken().line() + "]");
         hadRuntimeError = true;
     }
 

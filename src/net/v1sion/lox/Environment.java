@@ -1,5 +1,7 @@
 package net.v1sion.lox;
 
+import net.v1sion.lox.exceptions.RuntimeError;
+
 import java.util.HashMap;
 import java.util.Map;
 

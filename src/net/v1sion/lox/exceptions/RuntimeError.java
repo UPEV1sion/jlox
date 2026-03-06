@@ -1,4 +1,6 @@
-package net.v1sion.lox;
+package net.v1sion.lox.exceptions;
+
+import net.v1sion.lox.Token;
 
 /**
  * @author Emanuel Schäffer
@@ -11,5 +13,9 @@ public class RuntimeError extends RuntimeException {
     public RuntimeError(final Token token, final String message) {
         super(message);
         this.token = token;
+    }
+
+    public Token getToken() {
+        return token;
     }
 }

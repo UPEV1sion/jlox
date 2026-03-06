@@ -13,6 +13,7 @@ import static net.v1sion.lox.TokenType.*;
 public class Parser {
     private boolean allowExpression;
     private boolean foundExpression;
+    private int loopDepth;
 
     private static class ParseError extends RuntimeException {
     }
@@ -66,6 +67,8 @@ public class Parser {
         if(match(IF)) return ifStatement();
         if(match(PRINT)) return printStatement();
         if(match(WHILE)) return whileStatement();
+        if(match(BREAK)) return breakStatement();
+        if(match(CONTINUE)) return continueStatement();
         if(match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
@@ -89,14 +92,19 @@ public class Parser {
         final Expr increment = !check(RIGHT_PAREN) ? expression() : null;
         consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
-        Stmt body = statement();
+        try {
+            loopDepth++;
+            Stmt body = statement();
 
-        if(increment != null) body = new Stmt.Block(List.of(body, new Stmt.Expression(increment)));
-        if(condition == null) condition = new Expr.Literal(true);
-        body = new Stmt.While(condition, body);
-        if(initializer != null) body = new Stmt.Block(List.of(initializer, body));
+            if(increment != null) body = new Stmt.Block(List.of(body, new Stmt.Expression(increment)));
+            if(condition == null) condition = new Expr.Literal(true);
+            body = new Stmt.While(condition, body);
+            if(initializer != null) body = new Stmt.Block(List.of(initializer, body));
 
-        return body;
+            return body;
+        } finally {
+            loopDepth--;
+        }
     }
 
     private Stmt ifStatement() {
@@ -131,9 +139,28 @@ public class Parser {
         final Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after while condition.");
 
-        final Stmt body = statement();
+        try {
+            loopDepth++;
+            final Stmt body = statement();
 
-        return new Stmt.While(condition, body);
+            return new Stmt.While(condition, body);
+        } finally {
+            loopDepth--;
+        }
+    }
+
+    private Stmt breakStatement() {
+        if(loopDepth == 0) throw error(previous(), "Must be inside a loop to use 'break'.");
+
+        consume(SEMICOLON, "Expect ';' after 'break'.");
+        return new Stmt.Break();
+    }
+
+    private Stmt continueStatement() {
+        if(loopDepth == 0) throw error(previous(), "Must be inside a loop to use 'continue'.");
+
+        consume(SEMICOLON, "Expect ';' after 'continue'.");
+        return new Stmt.Continue();
     }
 
     private Stmt expressionStatement() {

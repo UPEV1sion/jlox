@@ -1,5 +1,9 @@
 package net.v1sion.lox;
 
+import net.v1sion.lox.exceptions.BreakException;
+import net.v1sion.lox.exceptions.ContinueException;
+import net.v1sion.lox.exceptions.RuntimeError;
+
 import java.util.List;
 
 import static net.v1sion.lox.Expr.*;
@@ -229,11 +233,29 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitWhileStmt(final While stmt) {
-        while(isTruthy(evaluate(stmt.condition()))) {
-            execute(stmt.body());
+        try {
+            while(isTruthy(evaluate(stmt.condition()))) {
+                try {
+                    execute(stmt.body());
+                } catch (final ContinueException error) {
+                    throw new UnsupportedOperationException("TODO: implement continue");
+                }
+            }
+        } catch (final BreakException error) {
+            // fallthrough
         }
 
         return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(final Break stmt) {
+        throw new BreakException();
+    }
+
+    @Override
+    public Void visitContinueStmt(final Continue stmt) {
+        throw new ContinueException();
     }
 
     @Override
