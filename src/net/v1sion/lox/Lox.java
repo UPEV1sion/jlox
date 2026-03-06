@@ -51,7 +51,7 @@ public class Lox {
 
             if(hadError) continue;
 
-            if(syntax instanceof List) {
+            if(syntax instanceof List<?>) {
                 @SuppressWarnings("unchecked")
                 final List<Stmt> stmts = (List<Stmt>) syntax;
                 interpreter.interpret(stmts);

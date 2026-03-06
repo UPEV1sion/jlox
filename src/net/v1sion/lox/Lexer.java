@@ -63,12 +63,12 @@ public class Lexer {
             case '}' -> addToken(RIGHT_BRACE);
             case ',' -> addToken(COMMA);
             case '.' -> addToken(DOT);
-            case '-' -> addToken(MINUS);
-            case '+' -> addToken(PLUS);
+            case '-' -> addToken(match('=') ? MINUS_EQUAL : MINUS);
+            case '+' -> addToken(match('=') ? PLUS_EQUAL : PLUS);
             case ';' -> addToken(SEMICOLON);
             case '?' -> addToken(QUESTION_MARK);
             case ':' -> addToken(COLON);
-            case '*' -> addToken(STAR);
+            case '*' -> addToken(match('=') ? STAR_EQUAL : STAR);
             case '!' -> addToken(match('=') ? BANG_EQUAL : BANG);
             case '=' -> addToken(match('=') ? EQUAL_EQUAL : EQUAL);
             case '<' -> addToken(match('=') ? LESS_EQUAL : LESS);
@@ -78,6 +78,8 @@ public class Lexer {
                     while (peek() != '\n' && !isAtEnd()) advance();
                 } else if (match('*')) {
                     multilineCommentIter();
+                } else if(match('=')) {
+                    addToken(SLASH_EQUAL);
                 } else {
                     addToken(SLASH);
                 }

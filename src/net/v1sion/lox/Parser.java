@@ -178,13 +178,25 @@ public class Parser {
     private Expr assignment() {
         final Expr expr = ternary();
 
-        if(match(EQUAL)) {
-            final Token equals = previous();
-            final Expr value = assignment();
+        if(match(EQUAL, PLUS_EQUAL, MINUS_EQUAL, STAR_EQUAL, SLASH_EQUAL)) {
+            final Token operator = previous();
+            Expr value = assignment();
 
-            if(expr instanceof Expr.Variable(final Token name)) return new Expr.Assign(name, value);
+            if(expr instanceof Expr.Variable(final Token name)) {
+                final Token binaryOperator = switch (operator.type()) {
+                    case PLUS_EQUAL  -> new Token(PLUS,  "+", null, operator.line());
+                    case MINUS_EQUAL -> new Token(MINUS, "-", null, operator.line());
+                    case STAR_EQUAL  -> new Token(STAR,  "*", null, operator.line());
+                    case SLASH_EQUAL -> new Token(SLASH, "/", null, operator.line());
+                    default          -> null;
+                };
 
-            error(equals, "Invalid assignment target.");
+                if(binaryOperator != null) value = new Expr.Binary(expr, binaryOperator, value);
+
+                return new Expr.Assign(name, value);
+            }
+
+            error(operator, "Invalid assignment target.");
         }
 
         return expr;
