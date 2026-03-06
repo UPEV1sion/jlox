@@ -4,6 +4,7 @@ import net.v1sion.lox.exceptions.BreakException;
 import net.v1sion.lox.exceptions.ContinueException;
 import net.v1sion.lox.exceptions.RuntimeError;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static net.v1sion.lox.Expr.*;
@@ -63,6 +64,21 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             case COMMA -> right;
             default    -> null;
         };
+    }
+
+    @Override
+    public Object visitCallExpr(final Call expr) {
+        final Object callee = evaluate(expr.callee());
+        final List<Object> arguments = new ArrayList<>();
+        for(final Expr argument : expr.arguments()) {
+            arguments.add(evaluate(argument));
+        }
+
+        if(!(callee instanceof final LoxCallable function)) {
+            throw new RuntimeError(expr.paren(), "Can only call functions and classes.");
+        } else {
+            return function.call(this, arguments);
+        }
     }
 
     @Override

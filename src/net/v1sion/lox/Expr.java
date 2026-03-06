@@ -13,6 +13,7 @@ public interface Expr {
     interface Visitor<R> {
         R visitAssignExpr(final Assign expr);
         R visitBinaryExpr(final Binary expr);
+        R visitCallExpr(final Call expr);
         R visitGroupingExpr(final Grouping expr);
         R visitLiteralExpr(final Literal expr);
         R visitLogicalExpr(final Logical expr);
@@ -34,6 +35,14 @@ public interface Expr {
         @Override
         public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitBinaryExpr(this);
+        }
+    }
+
+    record Call(Expr callee, Token paren, List<Expr> arguments) implements Expr {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitCallExpr(this);
         }
     }
 

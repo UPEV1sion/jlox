@@ -14,6 +14,7 @@ public class Parser {
     private boolean allowExpression;
     private boolean foundExpression;
     private int loopDepth;
+    private static final int MAX_ARGUMENTS = 0xFF;
 
     private static class ParseError extends RuntimeException {
     }
@@ -313,11 +314,37 @@ public class Parser {
     }
 
     private Expr unary() {
-        if (!match(BANG, MINUS)) return primary();
+        if (!match(BANG, MINUS)) return call();
 
         final Token operator = previous();
         final Expr right = unary();
         return new Expr.Unary(operator, right);
+    }
+
+    private Expr finishCall(final Expr callee) {
+        final List<Expr> arguments = new ArrayList<>();
+        if(!check(RIGHT_PAREN)) {
+            do {
+                if(arguments.size() >= MAX_ARGUMENTS) {
+                    error(peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.add(expression());
+            } while(match(COMMA));
+        }
+
+        final Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arguments);
+    }
+
+    private Expr call() {
+        Expr expr = primary();
+
+        while(match(LEFT_PAREN)) {
+            expr = finishCall(expr);
+        }
+
+        return expr;
     }
 
     private Expr primary() {
