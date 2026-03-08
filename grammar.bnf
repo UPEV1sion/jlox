@@ -4,10 +4,10 @@ declaration    ::= class_decl
                | var_decl
                | statement ;
 
-class_decl      ::= "class" IDENTIFIER ( "<" IDENTIFIER )?
+class_decl     ::= "class" IDENTIFIER ( "<" IDENTIFIER )?
                  "{" function* "}" ;
-fun_decl        ::= "fun" function ;
-var_decl        ::= "var" IDENTIFIER ( "=" expression )? ";" ;
+fun_decl       ::= "fun" function ;
+var_decl       ::= "var" IDENTIFIER ( "=" expression )? ";" ;
 statement      ::= expr_stmt
                | for_stmt
                | if_stmt
@@ -16,15 +16,15 @@ statement      ::= expr_stmt
                | while_stmt
                | block ;
 
-expr_stmt       ::= expression ";" ;
-for_stmt        ::= "for" "(" ( var_decl | expr_stmt | ";" )
+expr_stmt      ::= expression ";" ;
+for_stmt       ::= "for" "(" ( var_decl | expr_stmt | ";" )
                            expression? ";"
                            expression? ")" statement ;
-if_stmt         ::= "if" "(" expression ")" statement
+if_stmt        ::= "if" "(" expression ")" statement
                  ( "else" statement )? ;
-print_stmt      ::= "print" expression ";" ;
-return_stmt     ::= "return" expression? ";" ;
-while_stmt      ::= "while" "(" expression ")" statement ;
+print_stmt     ::= "print" expression ";" ;
+return_stmt    ::= "return" expression? ";" ;
+while_stmt     ::= "while" "(" expression ")" statement ;
 block          ::= "{" declaration* "}" ;
 
 expression     ::= comma ;
