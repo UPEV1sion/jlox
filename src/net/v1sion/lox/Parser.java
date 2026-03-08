@@ -54,6 +54,7 @@ public class Parser {
 
     private Stmt declaration() {
         try {
+            if(match(FUN)) return function("function");
             if(match(VAR)) return varDeclaration();
 
             return statement();
@@ -174,6 +175,22 @@ public class Parser {
         }
 
         return new Stmt.Expression(expr);
+    }
+
+    private Stmt.Function function(final String kind) {
+        final Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        final List<Token> parameters = new ArrayList<>();
+        if(!check(RIGHT_PAREN)) {
+            do {
+                if(parameters.size() >= MAX_ARGUMENTS) error(peek(), "Can't have more than " + MAX_ARGUMENTS + " parameters.");
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while(match(COMMA));
+        }
+        consume(RIGHT_PAREN,"Expect ')' after parameters.");
+        consume(LEFT_BRACE,"Expect '{' before " + kind + " body.");
+        final List<Stmt> body = block();
+        return new Stmt.Function(name, parameters, body);
     }
 
     private List<Stmt> block() {
@@ -325,9 +342,7 @@ public class Parser {
         final List<Expr> arguments = new ArrayList<>();
         if(!check(RIGHT_PAREN)) {
             do {
-                if(arguments.size() >= MAX_ARGUMENTS) {
-                    error(peek(), "Can't have more than 255 arguments.");
-                }
+                if(arguments.size() >= MAX_ARGUMENTS) error(peek(), "Can't have more than " + MAX_ARGUMENTS + " arguments.");
                 arguments.add(expression());
             } while(match(COMMA));
         }

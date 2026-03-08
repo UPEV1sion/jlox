@@ -16,8 +16,28 @@ import static net.v1sion.lox.Stmt.*;
  **/
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
-    private Environment environment = new Environment();
+    private final Environment globals = new Environment();
+    private Environment environment = globals;
     private static final Object uninitialized = new Object();
+
+    Interpreter () {
+        globals.define("clock", new LoxCallable() {
+            @Override
+            public int arity() {
+                return 0;
+            }
+
+            @Override
+            public Object call(final Interpreter interpreter, final List<Object> arguments) {
+                return System.currentTimeMillis() / 1000.0;
+            }
+
+            @Override
+            public String toString() {
+                return "<native fn>";
+            }
+        });
+    }
 
     @Override
     public Object visitBinaryExpr(final Binary expr) {
@@ -77,6 +97,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         if(!(callee instanceof final LoxCallable function)) {
             throw new RuntimeError(expr.paren(), "Can only call functions and classes.");
         } else {
+            if(arguments.size() != function.arity()) {
+                throw new RuntimeError(expr.paren(), "Expected " + function.arity() + " arguments but got " + arguments.size() + ".");
+            }
             return function.call(this, arguments);
         }
     }
