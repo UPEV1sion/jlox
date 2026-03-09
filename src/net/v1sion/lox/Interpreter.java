@@ -155,6 +155,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return value;
     }
 
+    @Override
+    public Object visitFunctionExpr(final Expr.Function expr) {
+        return new LoxFunction(null, expr, environment);
+    }
+
     void interpret(final List<Stmt> statements) {
         try {
             for (final Stmt statement : statements) {
@@ -247,8 +252,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
-    public Void visitFunctionStmt(final Function stmt) {
-        final LoxFunction function = new LoxFunction(stmt, environment);
+    public Void visitFunctionStmt(final Stmt.Function stmt) {
+        final LoxFunction function = new LoxFunction(stmt.name().lexeme(), stmt.function(), environment);
         environment.define(stmt.name().lexeme(), function);
 
         return null;

@@ -1,8 +1,8 @@
 package net.v1sion.lox.callables;
 
 import net.v1sion.lox.Environment;
+import net.v1sion.lox.Expr;
 import net.v1sion.lox.Interpreter;
-import net.v1sion.lox.Stmt;
 import net.v1sion.lox.exceptions.ReturnException;
 
 import java.util.List;
@@ -13,10 +13,15 @@ import java.util.List;
  **/
 
 public class LoxFunction implements LoxCallable {
-    private final Stmt.Function declaration;
+    private final String name;
+    private final Expr.Function declaration;
     private final Environment closure;
 
-    public LoxFunction(final Stmt.Function declaration, final Environment closure) {
+    public LoxFunction(
+            final String name,
+            final Expr.Function declaration,
+            final Environment closure) {
+        this.name = name;
         this.closure = closure;
         this.declaration = declaration;
     }
@@ -45,6 +50,6 @@ public class LoxFunction implements LoxCallable {
 
     @Override
     public String toString() {
-        return "<fn " + declaration.name().lexeme() + ">";
+        return name != null ? "<fn " + name + ">" : "<lambda>";
     }
 }

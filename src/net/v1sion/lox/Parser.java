@@ -54,7 +54,10 @@ public class Parser {
 
     private Stmt declaration() {
         try {
-            if(match(FUN)) return function("function");
+            if(check(FUN) && checkNext(IDENTIFIER)) {
+                consume(FUN, null);
+                return functionStatement("function");
+            }
             if(match(VAR)) return varDeclaration();
 
             return statement();
@@ -187,21 +190,10 @@ public class Parser {
         return new Stmt.Expression(expr);
     }
 
-    private Stmt.Function function(final String kind) {
+    private Stmt.Function functionStatement(final String kind) {
         final Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
-        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
-        final List<Token> parameters = new ArrayList<>();
-        if(!check(RIGHT_PAREN)) {
-            do {
-                if(parameters.size() >= MAX_ARGUMENTS) error(peek(), "Can't have more than " + MAX_ARGUMENTS + " parameters.");
-                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
-            } while(match(COMMA));
-        }
-        consume(RIGHT_PAREN,"Expect ')' after parameters.");
-        consume(LEFT_BRACE,"Expect '{' before " + kind + " body.");
-        final List<Stmt> body = block();
 
-        return new Stmt.Function(name, parameters, body);
+        return new Stmt.Function(name, function(kind));
     }
 
     private List<Stmt> block() {
@@ -374,10 +366,27 @@ public class Parser {
         return expr;
     }
 
+    private Expr.Function function(final String kind) {
+        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        final List<Token> parameters = new ArrayList<>();
+        if(!check(RIGHT_PAREN)) {
+            do {
+                if(parameters.size() >= MAX_ARGUMENTS) error(peek(), "Can't have more than " + MAX_ARGUMENTS + " parameters.");
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while(match(COMMA));
+        }
+        consume(RIGHT_PAREN,"Expect ')' after parameters.");
+        consume(LEFT_BRACE,"Expect '{' before " + kind + " body.");
+        final List<Stmt> body = block();
+
+        return new Expr.Function(parameters, body);
+    }
+
     private Expr primary() {
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE))  return new Expr.Literal(true);
         if (match(NIL))   return new Expr.Literal(null);
+        if (match(FUN))   return function("function");
 
         if (match(NUMBER, STRING)) return new Expr.Literal(previous().literal());
 
@@ -438,6 +447,11 @@ public class Parser {
         return peek().type() == type;
     }
 
+    private boolean checkNext(final TokenType type) {
+        if (isAtEnd()) return false;
+        return peekNext().type() == type;
+    }
+
     private Token advance() {
         if (!isAtEnd()) current++;
         return previous();
@@ -449,6 +463,10 @@ public class Parser {
 
     private Token peek() {
         return tokens.get(current);
+    }
+
+    private Token peekNext() {
+        return tokens.get(current + 1);
     }
 
     private Token previous() {

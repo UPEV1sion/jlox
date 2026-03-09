@@ -20,6 +20,7 @@ public interface Expr {
         R visitUnaryExpr(final Unary expr);
         R visitTernaryExpr(final Ternary expr);
         R visitVariableExpr(final Variable expr);
+        R visitFunctionExpr(final Function expr);
     }
 
     record Assign(Token name, Expr value) implements Expr {
@@ -91,6 +92,14 @@ public interface Expr {
         @Override
         public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitVariableExpr(this);
+        }
+    }
+
+    record Function(List<Token> params, List<Stmt> body) implements Expr {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitFunctionExpr(this);
         }
     }
 }

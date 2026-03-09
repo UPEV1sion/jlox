@@ -66,6 +66,11 @@ public class RpnPrinter implements Visitor<String> {
         return expr.name().lexeme();
     }
 
+    @Override
+    public String visitFunctionExpr(final Function expr) {
+        return "";
+    }
+
     public static void main(final String[] args) {
         final Expr comma = new Binary(
                 new Binary(

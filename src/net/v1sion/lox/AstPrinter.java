@@ -59,6 +59,11 @@ public class AstPrinter implements Visitor<String> {
         return expr.accept(this);
     }
 
+    @Override
+    public String visitFunctionExpr(final Function expr) {
+        return "";
+    }
+
     private String parenthesize(final String name, final Expr... exprs) {
         final StringBuilder builder = new StringBuilder();
 
