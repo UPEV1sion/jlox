@@ -23,7 +23,7 @@ public class Environment {
     }
 
     public void define(final String name, final Object value) {
-        values.put(name, value);
+        values.put(name, value); // TODO disallow shadowing
     }
 
     public Object get(final Token name) {
