@@ -1,5 +1,7 @@
 package net.v1sion.lox;
 
+import net.v1sion.lox.callables.LoxCallable;
+import net.v1sion.lox.callables.LoxFunction;
 import net.v1sion.lox.exceptions.BreakException;
 import net.v1sion.lox.exceptions.ContinueException;
 import net.v1sion.lox.exceptions.RuntimeError;
@@ -16,7 +18,7 @@ import static net.v1sion.lox.Stmt.*;
  **/
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
-    private final Environment globals = new Environment();
+    public final Environment globals = new Environment();
     private Environment environment = globals;
     private static final Object uninitialized = new Object();
 
@@ -216,7 +218,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         statement.accept(this);
     }
 
-    void executeBlock(final List<Stmt> statements, final Environment environment) {
+    public void executeBlock(final List<Stmt> statements, final Environment environment) {
         final Environment previous = this.environment;
 
         try {
@@ -245,6 +247,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitFunctionStmt(final Function stmt) {
+        final LoxFunction function = new LoxFunction(stmt);
+        environment.define(stmt.name().lexeme(), function);
+
         return null;
     }
 

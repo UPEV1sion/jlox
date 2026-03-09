@@ -24,6 +24,11 @@ public class AstPrinter implements Visitor<String> {
     }
 
     @Override
+    public String visitCallExpr(final Call expr) {
+        return "";
+    }
+
+    @Override
     public String visitGroupingExpr(final Grouping expr) {
         return parenthesize("group", expr.expression());
     }

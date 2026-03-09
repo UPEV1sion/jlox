@@ -25,6 +25,11 @@ public class RpnPrinter implements Visitor<String> {
     }
 
     @Override
+    public String visitCallExpr(final Call expr) {
+        return "";
+    }
+
+    @Override
     public String visitGroupingExpr(final Grouping expr) {
         return expr.expression().accept(this);
     }

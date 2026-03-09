@@ -190,6 +190,7 @@ public class Parser {
         consume(RIGHT_PAREN,"Expect ')' after parameters.");
         consume(LEFT_BRACE,"Expect '{' before " + kind + " body.");
         final List<Stmt> body = block();
+
         return new Stmt.Function(name, parameters, body);
     }
 
@@ -201,6 +202,7 @@ public class Parser {
         }
 
         consume(RIGHT_BRACE, "Expect '}' after block.");
+
         return statements;
     }
 
@@ -343,7 +345,7 @@ public class Parser {
         if(!check(RIGHT_PAREN)) {
             do {
                 if(arguments.size() >= MAX_ARGUMENTS) error(peek(), "Can't have more than " + MAX_ARGUMENTS + " arguments.");
-                arguments.add(expression());
+                arguments.add(assignment());
             } while(match(COMMA));
         }
 
