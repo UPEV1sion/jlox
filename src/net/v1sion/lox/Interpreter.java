@@ -4,6 +4,7 @@ import net.v1sion.lox.callables.LoxCallable;
 import net.v1sion.lox.callables.LoxFunction;
 import net.v1sion.lox.exceptions.BreakException;
 import net.v1sion.lox.exceptions.ContinueException;
+import net.v1sion.lox.exceptions.ReturnException;
 import net.v1sion.lox.exceptions.RuntimeError;
 
 import java.util.ArrayList;
@@ -247,7 +248,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitFunctionStmt(final Function stmt) {
-        final LoxFunction function = new LoxFunction(stmt);
+        final LoxFunction function = new LoxFunction(stmt, environment);
         environment.define(stmt.name().lexeme(), function);
 
         return null;
@@ -270,6 +271,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         System.out.println(stringify(value));
 
         return null;
+    }
+
+    @Override
+    public Void visitReturnStmt(final Return stmt) {
+        final Object value = stmt.value() != null ? evaluate(stmt.value()) : null;
+
+        throw new ReturnException(value);
     }
 
     @Override

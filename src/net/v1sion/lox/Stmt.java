@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 08.03.2026
+ * at 21.02.26, revision 09.03.2026
  **/
 
 public interface Stmt {
@@ -16,6 +16,7 @@ public interface Stmt {
         R visitFunctionStmt(final Function stmt);
         R visitIfStmt(final If stmt);
         R visitPrintStmt(final Print stmt);
+        R visitReturnStmt(final Return stmt);
         R visitVarStmt(final Var stmt);
         R visitWhileStmt(final While stmt);
         R visitBreakStmt(final Break stmt);
@@ -59,6 +60,14 @@ public interface Stmt {
         @Override
         public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitPrintStmt(this);
+        }
+    }
+
+    record Return(Token keyword, Expr value) implements Stmt {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitReturnStmt(this);
         }
     }
 
