@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * @author Emanuel Schäffer
- * at 23.02.26
+ * at 12.03.26
  **/
 
 public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
