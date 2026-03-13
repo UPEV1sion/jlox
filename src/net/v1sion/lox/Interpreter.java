@@ -8,7 +8,9 @@ import net.v1sion.lox.exceptions.ReturnException;
 import net.v1sion.lox.exceptions.RuntimeError;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static net.v1sion.lox.Expr.*;
 import static net.v1sion.lox.Stmt.*;
@@ -21,6 +23,7 @@ import static net.v1sion.lox.Stmt.*;
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public final Environment globals = new Environment();
     private Environment environment = globals;
+    private final Map<Expr, Integer> locals = new HashMap<>();
     private static final Object uninitialized = new Object();
 
     Interpreter () {
@@ -222,6 +225,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private void execute(final Stmt statement) {
         statement.accept(this);
+    }
+
+    void resolve(final Expr expr, final int depth) {
+        locals.put(expr, depth);
     }
 
     public void executeBlock(final List<Stmt> statements, final Environment environment) {
