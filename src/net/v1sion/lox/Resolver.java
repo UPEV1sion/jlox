@@ -13,7 +13,7 @@ import java.util.*;
 public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private final Interpreter interpreter;
-    private final Deque<Map<String, Variable>> scopes = new ArrayDeque<>();
+    private final Stack<Map<String, Variable>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
 
     private record Variable(Token name, VariableState state, int slot) {
@@ -73,7 +73,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     private void endScope() {
         for(final Map.Entry<String, Variable> var : scopes.pop().entrySet()) {
             if(var.getValue().state() != VariableState.READ) {
-                Lox.warning(var.getValue().name().line(), "Unused local variable: " + var.getKey() + ".");
+                Lox.warning(var.getValue().name().line(), "Unused local variable: '" + var.getKey() + "'.");
             }
         }
     }
@@ -98,19 +98,15 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     }
 
     private void resolveLocal(final Expr expr, final Token name, final boolean isRead) {
-        int depth = 0;
-
-        for (final Map<String, Variable> scope : scopes) {
-            if (scope.containsKey(name.lexeme())) {
-                final Variable var = scope.get(name.lexeme());
-                interpreter.resolve(expr, depth, var.slot());
-                if(isRead) {
-                    scope.put(name.lexeme(), new Variable(name, VariableState.READ, var.slot()));
+        for (int i = scopes.size() - 1; i >= 0; i--) {
+            if (scopes.get(i).containsKey(name.lexeme())) {
+                final Variable var = scopes.get(i).get(name.lexeme());
+                interpreter.resolve(expr, scopes.size() - 1 - i, var.slot());
+                if (isRead) {
+                    scopes.get(i).put(name.lexeme(), new Variable(name, VariableState.READ, var.slot()));
                 }
                 return;
             }
-
-            depth++;
         }
     }
 

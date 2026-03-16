@@ -7,10 +7,7 @@ import net.v1sion.lox.exceptions.ContinueException;
 import net.v1sion.lox.exceptions.ReturnException;
 import net.v1sion.lox.exceptions.RuntimeError;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.v1sion.lox.Expr.*;
 import static net.v1sion.lox.Stmt.*;
@@ -23,8 +20,8 @@ import static net.v1sion.lox.Stmt.*;
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public final Map<String, Object> globals = new HashMap<>();
     private Environment environment;
-    private final Map<Expr, Integer> locals = new HashMap<>();
-    private final Map<Expr, Integer> slots = new HashMap<>();
+    private final Map<Expr, Integer> locals = new IdentityHashMap<>();
+    private final Map<Expr, Integer> slots = new IdentityHashMap<>();
     private static final Object uninitialized = new Object();
 
     Interpreter () {
@@ -349,7 +346,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitAssignExpr(final Assign expr) {
         final Object value = evaluate(expr.value());
-//        environment.assign(expr.name(), value);
 
         final Integer distance = locals.get(expr);
         if(distance != null) {
