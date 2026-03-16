@@ -13,6 +13,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private final Interpreter interpreter;
     private final Deque<Map<String, Boolean>> scopes = new ArrayDeque<>();
+    private final Deque<Map<String, Integer>> unusedVariables = new ArrayDeque<>();
     private FunctionType currentFunction = FunctionType.NONE;
 
     private enum FunctionType {
@@ -55,20 +56,27 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private void beginScope() {
         scopes.push(new HashMap<>());
+        unusedVariables.push(new HashMap<>());
     }
 
     private void endScope() {
         scopes.pop();
+
+        for(final Map.Entry<String, Integer> var : unusedVariables.pop().entrySet()) {
+            Lox.warning(var.getValue(), "Unused local variable: " + var.getKey());
+        }
     }
 
     private void declare(final Token name) {
-        if(scopes.isEmpty()) return;
+        if(scopes.isEmpty() || unusedVariables.isEmpty()) return;
+
         final Map<String, Boolean> scope = scopes.peek();
         if(scope.containsKey(name.lexeme())) {
             Lox.error(name, "Already a variable with this name in this scope.");
         }
 
         scope.put(name.lexeme(), false);
+        unusedVariables.peek().put(name.lexeme(), name.line());
     }
 
     private void define(final Token name) {
@@ -78,11 +86,21 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private void resolveLocal(final Expr expr, final Token name) {
         int depth = 0;
-        for(final Iterator<Map<String, Boolean>> it = scopes.descendingIterator(); it.hasNext(); depth++) {
-            if(it.next().containsKey(name.lexeme())) {
+
+        final Iterator<Map<String, Boolean>> scopeIt = scopes.iterator();
+        final Iterator<Map<String, Integer>> unusedIt = unusedVariables.iterator();
+
+        while(scopeIt.hasNext() && unusedIt.hasNext()) {
+            final Map<String, Boolean> scope = scopeIt.next();
+            final Map<String, Integer> unused = unusedIt.next();
+
+            if(scope.containsKey(name.lexeme())) {
+                unused.remove(name.lexeme());
                 interpreter.resolve(expr, depth);
                 return;
             }
+
+            depth++;
         }
     }
 
@@ -162,6 +180,19 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     @Override
     public Void visitFunctionExpr(final Expr.Function expr) {
+        final FunctionType enclosingFunction = currentFunction;
+        currentFunction = FunctionType.FUNCTION;
+
+        beginScope();
+        for(final Token param : expr.params()) {
+            declare(param);
+            define(param);
+        }
+        resolve(expr.body());
+        endScope();
+
+        currentFunction = enclosingFunction;
+
         return null;
     }
 

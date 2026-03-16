@@ -153,9 +153,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(final Variable expr) {
-//        final Object value = environment.get(expr.name());
-//        if(value == uninitialized) throw new RuntimeError(expr.name(), "Variable must be initialized before use.");
-//        return value;
         return lookupVariable(expr.name(), expr);
     }
 

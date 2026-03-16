@@ -80,6 +80,10 @@ public class Lox {
         interpreter.interpret(statements);
     }
 
+    static void warning(final int line, final String message) {
+        System.err.println("[line " + line + "] Warning" + ": " + message);
+    }
+
     static void error(final int line, final String message) {
         report(line, "", message);
     }
