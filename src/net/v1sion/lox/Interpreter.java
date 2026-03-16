@@ -21,13 +21,14 @@ import static net.v1sion.lox.Stmt.*;
  **/
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
-    public final Environment globals = new Environment();
-    private Environment environment = globals;
+    public final Map<String, Object> globals = new HashMap<>();
+    private Environment environment;
     private final Map<Expr, Integer> locals = new HashMap<>();
+    private final Map<Expr, Integer> slots = new HashMap<>();
     private static final Object uninitialized = new Object();
 
     Interpreter () {
-        globals.define("clock", new LoxCallable() {
+        globals.put("clock", new LoxCallable() {
             @Override
             public int arity() {
                 return 0;
@@ -161,9 +162,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         final Integer distance = locals.get(expr);
         if(distance != null) {
-            value = environment.getAt(distance, name.lexeme());
+            value = environment.getAt(distance, slots.get(expr));
         } else {
-            value = globals.get(name);
+            if(globals.containsKey(name.lexeme())) {
+                value = globals.get(name.lexeme());
+            } else {
+                throw new RuntimeError(name, "Undefined variable '" + name.lexeme() + "'.");
+            }
         }
 
         if(value == uninitialized) throw new RuntimeError(name, "Variable must be initialized before use.");
@@ -239,8 +244,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         statement.accept(this);
     }
 
-    void resolve(final Expr expr, final int depth) {
+    void resolve(final Expr expr, final int depth, final int slot) {
         locals.put(expr, depth);
+        slots.put(expr, slot);
     }
 
     public void executeBlock(final List<Stmt> statements, final Environment environment) {
@@ -274,7 +280,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitFunctionStmt(final Stmt.Function stmt) {
         final String name = stmt.name().lexeme();
         final LoxFunction function = new LoxFunction(name, stmt.function(), environment);
-        environment.define(name, function);
+        define(stmt.name(), function);
 
         return null;
     }
@@ -308,7 +314,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitVarStmt(final Var stmt) {
         final Object value = stmt.initializer() != null ? evaluate(stmt.initializer()) : uninitialized;
-        environment.define(stmt.name().lexeme(), value);
+        define(stmt.name(), value);
 
         return null;
     }
@@ -347,11 +353,23 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         final Integer distance = locals.get(expr);
         if(distance != null) {
-            environment.assignAt(distance, expr.name(), value);
+            environment.assignAt(distance, slots.get(expr), value);
         } else {
-            globals.assign(expr.name(), value);
+            if (globals.containsKey(expr.name().lexeme())) {
+                globals.put(expr.name().lexeme(), value);
+            } else {
+                throw new RuntimeError(expr.name(),"Undefined variable '" + expr.name().lexeme() + "'.");
+            }
         }
 
         return value;
+    }
+
+    private void define(final Token name, final Object value) {
+        if(environment != null) {
+            environment.define(value);
+        } else {
+            globals.put(name.lexeme(), value);
+        }
     }
 }

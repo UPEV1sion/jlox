@@ -16,7 +16,11 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     private final Deque<Map<String, Variable>> scopes = new ArrayDeque<>();
     private FunctionType currentFunction = FunctionType.NONE;
 
-    private record Variable(Token name, VariableState state) {}
+    private record Variable(Token name, VariableState state, int slot) {
+        public Variable withState(final VariableState state) {
+            return new Variable(name, state, slot);
+        }
+    }
 
     private enum VariableState {
         DECLARED,
@@ -69,7 +73,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     private void endScope() {
         for(final Map.Entry<String, Variable> var : scopes.pop().entrySet()) {
             if(var.getValue().state() != VariableState.READ) {
-                Lox.warning(var.getValue().name().line(), "Unused local variable: " + var.getKey());
+                Lox.warning(var.getValue().name().line(), "Unused local variable: " + var.getKey() + ".");
             }
         }
     }
@@ -82,12 +86,15 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
             Lox.error(name, "Already a variable with this name in this scope.");
         }
 
-        scope.put(name.lexeme(), new Variable(name, VariableState.DECLARED));
+        scope.put(name.lexeme(), new Variable(name, VariableState.DECLARED, scope.size()));
     }
 
     private void define(final Token name) {
         if(scopes.isEmpty()) return;
-        scopes.peek().put(name.lexeme(), new Variable(name, VariableState.DEFINED));
+        final Map<String, Variable> scope = scopes.peek();
+        final Variable old = scope.get(name.lexeme());
+        assert old != null : "FATAL: Variable define before declaration.";
+        scope.put(name.lexeme(), old.withState(VariableState.DEFINED));
     }
 
     private void resolveLocal(final Expr expr, final Token name, final boolean isRead) {
@@ -95,9 +102,10 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
         for (final Map<String, Variable> scope : scopes) {
             if (scope.containsKey(name.lexeme())) {
-                interpreter.resolve(expr, depth);
+                final Variable var = scope.get(name.lexeme());
+                interpreter.resolve(expr, depth, var.slot());
                 if(isRead) {
-                    scope.put(name.lexeme(), new Variable(name, VariableState.READ));
+                    scope.put(name.lexeme(), new Variable(name, VariableState.READ, var.slot()));
                 }
                 return;
             }

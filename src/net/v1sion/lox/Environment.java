@@ -1,9 +1,7 @@
 package net.v1sion.lox;
 
-import net.v1sion.lox.exceptions.RuntimeError;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Emanuel Schäffer
@@ -12,7 +10,7 @@ import java.util.Map;
 
 public class Environment {
     final Environment enclosing;
-    private final Map<String, Object> values = new HashMap<>();
+    private final List<Object> values = new ArrayList<>();
 
     public Environment() {
         enclosing = null;
@@ -22,8 +20,8 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
-    public void define(final String name, final Object value) {
-        values.put(name, value); // TODO disallow shadowing
+    public void define(final Object value) {
+        values.add(value); // TODO disallow shadowing
     }
 
     Environment ancestor(final int distance) {
@@ -35,35 +33,21 @@ public class Environment {
         return environment;
     }
 
-    public Object getAt(final int distance, final String name) {
-        return ancestor(distance).values.get(name);
+    public Object getAt(final int distance, final int slot) {
+        return ancestor(distance).values.get(slot);
     }
 
-    public void assignAt(final int distance, final Token name, final Object value) {
-        ancestor(distance).values.put(name.lexeme(), value);
+    public void assignAt(final int distance, final int slot, final Object value) {
+        ancestor(distance).values.set(slot, value);
     }
 
-    public Object get(final Token name) {
-        if(values.containsKey(name.lexeme())) {
-            return values.get(name.lexeme());
-        }
-
-        if(enclosing != null) return enclosing.get(name);
-
-        throw new RuntimeError(name, "Undefined variable '" + name.lexeme() + "'.");
-    }
-
-    public void assign(final Token name, final Object value) {
-        if(values.containsKey(name.lexeme())) {
-            values.put(name.lexeme(), value);
-            return;
-        }
-
+    @Override
+    public String toString() {
+        String result = values.toString();
         if(enclosing != null) {
-            enclosing.assign(name, value);
-            return;
+            result += enclosing.toString();
         }
 
-        throw new RuntimeError(name, "Undefined variable '" + name.lexeme() + "'.");
+        return result;
     }
 }
