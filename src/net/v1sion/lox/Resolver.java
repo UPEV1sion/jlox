@@ -8,13 +8,21 @@ import java.util.*;
  **/
 
 // TODO more checks like "break", "continue" inside loop
+// TODO maybe an light unused variable check
 
 public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private final Interpreter interpreter;
-    private final Deque<Map<String, Boolean>> scopes = new ArrayDeque<>();
-    private final Deque<Map<String, Integer>> unusedVariables = new ArrayDeque<>();
+    private final Deque<Map<String, Variable>> scopes = new ArrayDeque<>();
     private FunctionType currentFunction = FunctionType.NONE;
+
+    private record Variable(Token name, VariableState state) {}
+
+    private enum VariableState {
+        DECLARED,
+        DEFINED,
+        READ,
+    }
 
     private enum FunctionType {
         NONE,
@@ -56,47 +64,41 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private void beginScope() {
         scopes.push(new HashMap<>());
-        unusedVariables.push(new HashMap<>());
     }
 
     private void endScope() {
-        scopes.pop();
-
-        for(final Map.Entry<String, Integer> var : unusedVariables.pop().entrySet()) {
-            Lox.warning(var.getValue(), "Unused local variable: " + var.getKey());
+        for(final Map.Entry<String, Variable> var : scopes.pop().entrySet()) {
+            if(var.getValue().state() != VariableState.READ) {
+                Lox.warning(var.getValue().name().line(), "Unused local variable: " + var.getKey());
+            }
         }
     }
 
     private void declare(final Token name) {
-        if(scopes.isEmpty() || unusedVariables.isEmpty()) return;
+        if(scopes.isEmpty()) return;
 
-        final Map<String, Boolean> scope = scopes.peek();
+        final Map<String, Variable> scope = scopes.peek();
         if(scope.containsKey(name.lexeme())) {
             Lox.error(name, "Already a variable with this name in this scope.");
         }
 
-        scope.put(name.lexeme(), false);
-        unusedVariables.peek().put(name.lexeme(), name.line());
+        scope.put(name.lexeme(), new Variable(name, VariableState.DECLARED));
     }
 
     private void define(final Token name) {
         if(scopes.isEmpty()) return;
-        scopes.peek().put(name.lexeme(), true);
+        scopes.peek().put(name.lexeme(), new Variable(name, VariableState.DEFINED));
     }
 
-    private void resolveLocal(final Expr expr, final Token name) {
+    private void resolveLocal(final Expr expr, final Token name, final boolean isRead) {
         int depth = 0;
 
-        final Iterator<Map<String, Boolean>> scopeIt = scopes.iterator();
-        final Iterator<Map<String, Integer>> unusedIt = unusedVariables.iterator();
-
-        while(scopeIt.hasNext() && unusedIt.hasNext()) {
-            final Map<String, Boolean> scope = scopeIt.next();
-            final Map<String, Integer> unused = unusedIt.next();
-
-            if(scope.containsKey(name.lexeme())) {
-                unused.remove(name.lexeme());
+        for (final Map<String, Variable> scope : scopes) {
+            if (scope.containsKey(name.lexeme())) {
                 interpreter.resolve(expr, depth);
+                if(isRead) {
+                    scope.put(name.lexeme(), new Variable(name, VariableState.READ));
+                }
                 return;
             }
 
@@ -107,7 +109,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     @Override
     public Void visitAssignExpr(final Expr.Assign expr) {
         resolve(expr.value());
-        resolveLocal(expr, expr.name());
+        resolveLocal(expr, expr.name(), false);
 
         return null;
     }
@@ -169,11 +171,13 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     @Override
     public Void visitVariableExpr(final Expr.Variable expr) {
-        if(!scopes.isEmpty() && scopes.peek().get(expr.name().lexeme()) == Boolean.FALSE) {
+        if(!scopes.isEmpty()
+                && scopes.peek().containsKey(expr.name().lexeme())
+                && scopes.peek().get(expr.name().lexeme()).state() == VariableState.DECLARED) {
             Lox.error(expr.name(), "Can't read load variable which is its own initializer.");
         }
 
-        resolveLocal(expr, expr.name());
+        resolveLocal(expr, expr.name(), true);
 
         return null;
     }
