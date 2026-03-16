@@ -7,10 +7,18 @@ import java.util.*;
  * at 12.03.26
  **/
 
+// TODO more checks like "break", "continue" inside loop
+
 public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private final Interpreter interpreter;
     private final Deque<Map<String, Boolean>> scopes = new ArrayDeque<>();
+    private FunctionType currentFunction = FunctionType.NONE;
+
+    private enum FunctionType {
+        NONE,
+        FUNCTION
+    }
 
     Resolver(final Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -30,7 +38,10 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         }
     }
 
-    private void resolveFunction(final Stmt.Function function) {
+    private void resolveFunction(final Stmt.Function function, final FunctionType type) {
+        final FunctionType enclosingFunction = currentFunction;
+        currentFunction = type;
+
         beginScope();
         for(final Token param : function.function().params()) {
             declare(param);
@@ -38,6 +49,8 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         }
         resolve(function.function().body());
         endScope();
+
+        currentFunction = enclosingFunction;
     }
 
     private void beginScope() {
@@ -50,7 +63,12 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private void declare(final Token name) {
         if(scopes.isEmpty()) return;
-        scopes.peek().put(name.lexeme(), false);
+        final Map<String, Boolean> scope = scopes.peek();
+        if(scope.containsKey(name.lexeme())) {
+            Lox.error(name, "Already a variable with this name in this scope.");
+        }
+
+        scope.put(name.lexeme(), false);
     }
 
     private void define(final Token name) {
@@ -167,7 +185,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     public Void visitFunctionStmt(final Stmt.Function stmt) {
         declare(stmt.name());
         define(stmt.name());
-        resolveFunction(stmt);
+        resolveFunction(stmt, FunctionType.FUNCTION);
 
         return null;
     }
@@ -190,6 +208,10 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     @Override
     public Void visitReturnStmt(final Stmt.Return stmt) {
+        if(currentFunction == FunctionType.NONE) {
+            Lox.error(stmt.keyword(), "Can't return from top-level code.");
+        }
+
         if(stmt.value() != null) resolve(stmt.value());
 
         return null;

@@ -153,8 +153,23 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(final Variable expr) {
-        final Object value = environment.get(expr.name());
-        if(value == uninitialized) throw new RuntimeError(expr.name(), "Variable must be initialized before use.");
+//        final Object value = environment.get(expr.name());
+//        if(value == uninitialized) throw new RuntimeError(expr.name(), "Variable must be initialized before use.");
+//        return value;
+        return lookupVariable(expr.name(), expr);
+    }
+
+    private Object lookupVariable(final Token name, final Expr expr) {
+        final Object value;
+
+        final Integer distance = locals.get(expr);
+        if(distance != null) {
+            value = environment.getAt(distance, name.lexeme());
+        } else {
+            value = globals.get(name);
+        }
+
+        if(value == uninitialized) throw new RuntimeError(name, "Variable must be initialized before use.");
         return value;
     }
 
@@ -331,7 +346,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitAssignExpr(final Assign expr) {
         final Object value = evaluate(expr.value());
-        environment.assign(expr.name(), value);
+//        environment.assign(expr.name(), value);
+
+        final Integer distance = locals.get(expr);
+        if(distance != null) {
+            environment.assignAt(distance, expr.name(), value);
+        } else {
+            globals.assign(expr.name(), value);
+        }
 
         return value;
     }
