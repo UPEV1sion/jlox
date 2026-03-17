@@ -1,6 +1,7 @@
 package net.v1sion.lox;
 
 import net.v1sion.lox.callables.LoxCallable;
+import net.v1sion.lox.callables.LoxClass;
 import net.v1sion.lox.callables.LoxFunction;
 import net.v1sion.lox.exceptions.BreakException;
 import net.v1sion.lox.exceptions.ContinueException;
@@ -21,7 +22,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public final Map<String, Object> globals = new HashMap<>();
     private Environment environment;
     private final Map<Expr, Integer> locals = new IdentityHashMap<>();
-    private final Map<Expr, Integer> slots = new IdentityHashMap<>();
+    private final Map<Expr, Integer> slots  = new IdentityHashMap<>();
     private static final Object uninitialized = new Object();
 
     Interpreter () {
@@ -267,6 +268,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitClassStmt(final Stmt.Class stmt) {
+        final int slot = define(stmt.name(), null);
+        final String name = stmt.name().lexeme();
+        final LoxClass klass = new LoxClass(name);
+        if(environment != null) {
+            environment.assignAt(0, slot, klass);
+        } else {
+            if(globals.containsKey(name)) {
+                globals.put(name, klass);
+            } else {
+                throw new RuntimeError(stmt.name(), "Undefined class name '" + name + "'.");
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(final Expression stmt) {
         evaluate(stmt.expression());
 
@@ -361,11 +380,28 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return value;
     }
 
-    private void define(final Token name, final Object value) {
+    private int define(final Token name, final Object value) {
         if(environment != null) {
-            environment.define(value);
+            return environment.define(value);
         } else {
             globals.put(name.lexeme(), value);
+            return globals.size() - 1;
         }
+    }
+
+    private void assign(final Token name, final Expr expr, final Object value) {
+        final Integer distance = locals.get(expr);
+        if (distance != null) {
+            final Integer slot = slots.get(expr);
+            environment.assignAt(distance, slot, value);
+            return;
+        }
+
+        if (globals.containsKey(name.lexeme())) {
+            globals.put(name.lexeme(), value);
+            return;
+        }
+
+        throw new RuntimeError(name, "Undefined variable '" + name.lexeme() + "'.");
     }
 }

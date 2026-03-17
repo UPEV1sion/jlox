@@ -20,8 +20,9 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
-    public void define(final Object value) {
+    public int define(final Object value) {
         values.add(value); // TODO disallow shadowing
+        return values.size() - 1;
     }
 
     Environment ancestor(final int distance) {

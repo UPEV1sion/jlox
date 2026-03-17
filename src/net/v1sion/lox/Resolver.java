@@ -13,7 +13,7 @@ import java.util.*;
 public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private final Interpreter interpreter;
-    private final Stack<Map<String, Variable>> scopes = new Stack<>();
+    private final Deque<Map<String, Variable>> scopes = new ArrayDeque<>();
     private FunctionType currentFunction = FunctionType.NONE;
 
     private record Variable(Token name, VariableState state, int slot) {
@@ -98,15 +98,18 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     }
 
     private void resolveLocal(final Expr expr, final Token name, final boolean isRead) {
-        for (int i = scopes.size() - 1; i >= 0; i--) {
-            if (scopes.get(i).containsKey(name.lexeme())) {
-                final Variable var = scopes.get(i).get(name.lexeme());
-                interpreter.resolve(expr, scopes.size() - 1 - i, var.slot());
-                if (isRead) {
-                    scopes.get(i).put(name.lexeme(), new Variable(name, VariableState.READ, var.slot()));
-                }
+        int depth = 0;
+
+        for (final Map<String, Variable> scope : scopes) {
+            if (scope.containsKey(name.lexeme())) {
+                final Variable var = scope.get(name.lexeme());
+                interpreter.resolve(expr, depth, var.slot());
+                if(isRead) scope.put(name.lexeme(), new Variable(name, VariableState.READ, var.slot()));
+
                 return;
             }
+
+            depth++;
         }
     }
 
@@ -209,6 +212,16 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         beginScope();
         resolve(stmt.statements());
         endScope();
+
+        return null;
+    }
+
+    @Override
+    public Void visitClassStmt(final Stmt.Class stmt) {
+        declare(stmt.name());
+        define(stmt.name());
+
+        System.out.println();
 
         return null;
     }
