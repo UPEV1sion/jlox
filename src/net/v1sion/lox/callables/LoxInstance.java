@@ -1,5 +1,11 @@
 package net.v1sion.lox.callables;
 
+/**
+ * @author Emanuel Schäffer
+ * at 19.03.26
+ **/
+
+
 public record LoxInstance(LoxClass klass) {
 
     @Override
