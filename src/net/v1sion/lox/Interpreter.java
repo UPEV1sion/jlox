@@ -3,6 +3,7 @@ package net.v1sion.lox;
 import net.v1sion.lox.callables.LoxCallable;
 import net.v1sion.lox.callables.LoxClass;
 import net.v1sion.lox.callables.LoxFunction;
+import net.v1sion.lox.callables.LoxInstance;
 import net.v1sion.lox.exceptions.BreakException;
 import net.v1sion.lox.exceptions.ContinueException;
 import net.v1sion.lox.exceptions.ReturnException;
@@ -107,6 +108,29 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             }
             return function.call(this, arguments);
         }
+    }
+
+    @Override
+    public Object visitGetExpr(final Get expr) {
+        final Object object = evaluate(expr.object());
+        if(object instanceof final LoxInstance instance) {
+            return instance.get(expr.name());
+        }
+
+        throw new RuntimeError(expr.name(), "Only instances have properties.");
+    }
+
+    @Override
+    public Object visitSetExpr(final Expr.Set expr) {
+        final Object object = evaluate(expr.object());
+
+        if(object instanceof final LoxInstance instance) {
+            final Object value = evaluate(expr.value());
+            instance.set(expr.name(), value);
+            return value;
+        }
+
+        throw new RuntimeError(expr.name(), "Only instances have fields.");
     }
 
     @Override
@@ -387,21 +411,5 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             globals.put(name.lexeme(), value);
             return globals.size() - 1;
         }
-    }
-
-    private void assign(final Token name, final Expr expr, final Object value) {
-        final Integer distance = locals.get(expr);
-        if (distance != null) {
-            final Integer slot = slots.get(expr);
-            environment.assignAt(distance, slot, value);
-            return;
-        }
-
-        if (globals.containsKey(name.lexeme())) {
-            globals.put(name.lexeme(), value);
-            return;
-        }
-
-        throw new RuntimeError(name, "Undefined variable '" + name.lexeme() + "'.");
     }
 }

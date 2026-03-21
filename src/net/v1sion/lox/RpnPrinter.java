@@ -30,6 +30,16 @@ public class RpnPrinter implements Visitor<String> {
     }
 
     @Override
+    public String visitGetExpr(final Get expr) {
+        return "";
+    }
+
+    @Override
+    public String visitSetExpr(final Set expr) {
+        return "";
+    }
+
+    @Override
     public String visitGroupingExpr(final Grouping expr) {
         return expr.expression().accept(this);
     }

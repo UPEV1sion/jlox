@@ -258,6 +258,8 @@ public class Parser {
                 if(binaryOperator != null) value = new Expr.Binary(expr, binaryOperator, value);
 
                 return new Expr.Assign(name, value);
+            } else if(expr instanceof Expr.Get(final Expr object, final Token name)) {
+                return new Expr.Set(object, name, value);
             }
 
             error(operator, "Invalid assignment target.");
@@ -374,8 +376,15 @@ public class Parser {
     private Expr call() {
         Expr expr = primary();
 
-        while(match(LEFT_PAREN)) {
-            expr = finishCall(expr);
+        while(true) {
+            if(match(LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else if(match(DOT)) {
+                final Token name = consume(IDENTIFIER, "Expect property name after '.'");
+                expr = new Expr.Get(expr, name);
+            } else {
+                break;
+            }
         }
 
         return expr;
