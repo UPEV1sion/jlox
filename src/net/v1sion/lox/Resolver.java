@@ -29,8 +29,9 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     }
 
     private enum FunctionType {
-        NONE,
-        FUNCTION
+        FUNCTION,
+        METHOD,
+        NONE
     }
 
     Resolver(final Interpreter interpreter) {
@@ -236,7 +237,10 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         declare(stmt.name());
         define(stmt.name());
 
-        System.out.println();
+        for (final Stmt.Function method : stmt.methods()) {
+            final FunctionType declaration = FunctionType.METHOD;
+            resolveFunction(method, declaration);
+        }
 
         return null;
     }

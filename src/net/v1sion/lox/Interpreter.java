@@ -294,8 +294,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitClassStmt(final Stmt.Class stmt) {
         final int slot = define(stmt.name(), null);
+
+        final Map<String, LoxFunction> methods = new HashMap<>();
+        for(final Stmt.Function method : stmt.methods()) {
+            final String name = method.name().lexeme();
+            final LoxFunction function = new LoxFunction(name, method.function(), environment);
+            methods.put(name, function);
+        }
+
         final String name = stmt.name().lexeme();
-        final LoxClass klass = new LoxClass(name);
+        final LoxClass klass = new LoxClass(name, methods);
         if(environment != null) {
             environment.assignAt(0, slot, klass);
         } else {
