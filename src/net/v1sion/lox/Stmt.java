@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 21.03.2026
+ * at 21.02.26, revision 24.03.2026
  **/
 
 public interface Stmt {

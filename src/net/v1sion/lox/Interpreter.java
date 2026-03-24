@@ -134,6 +134,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Object visitThisExpr(final This expr) {
+        return lookupVariable(expr.keyword(), expr);
+    }
+
+    @Override
     public Object visitGroupingExpr(final Grouping expr) {
         return evaluate(expr.expression());
     }
