@@ -15,6 +15,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     private final Interpreter interpreter;
     private final Deque<Map<String, Variable>> scopes = new ArrayDeque<>();
     private FunctionType currentFunction = FunctionType.NONE;
+    private ClassType currentClass = ClassType.NONE;
 
     private record Variable(Token name, VariableState state, int slot) {
         public Variable withState(final VariableState state) {
@@ -31,6 +32,11 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     private enum FunctionType {
         FUNCTION,
         METHOD,
+        NONE
+    }
+
+    private enum ClassType {
+        CLASS,
         NONE
     }
 
@@ -158,6 +164,11 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     @Override
     public Void visitThisExpr(final Expr.This expr) {
+        if(currentClass == ClassType.NONE) {
+            Lox.error(expr.keyword(), "Can't use 'this' outside of an class.");
+            return null;
+        }
+
         resolveLocal(expr, expr.keyword(), true);
         return null;
     }
@@ -240,6 +251,9 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     @Override
     public Void visitClassStmt(final Stmt.Class stmt) {
+        final ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
         declare(stmt.name());
         define(stmt.name());
 
@@ -253,6 +267,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         }
 
         endScope();
+        currentClass = enclosingClass;
 
         return null;
     }
