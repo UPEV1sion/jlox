@@ -20,12 +20,18 @@ public record LoxClass(String name, Map<String, LoxFunction> methods) implements
 
     @Override
     public int arity() {
-        return 0;
+        final LoxFunction initializer = findMethod("init");
+        if(initializer == null) return 0;
+        return initializer.arity();
     }
 
     @Override
     public Object call(final Interpreter interpreter, final List<Object> arguments) {
-        return new LoxInstance(this);
+        final LoxInstance instance = new LoxInstance(this);
+        final LoxFunction initializer = findMethod("init");
+        if(initializer != null) initializer.bind(instance).call(interpreter, arguments);
+
+        return instance;
     }
 
     public LoxFunction findMethod(final String name) {

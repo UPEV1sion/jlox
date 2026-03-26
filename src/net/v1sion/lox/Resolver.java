@@ -30,14 +30,15 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     }
 
     private enum FunctionType {
+        INITIALIZER,
         FUNCTION,
         METHOD,
-        NONE
+        NONE,
     }
 
     private enum ClassType {
         CLASS,
-        NONE
+        NONE,
     }
 
     Resolver(final Interpreter interpreter) {
@@ -262,7 +263,8 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         scopes.peek().put("this", new Variable(thisToken, VariableState.READ, scopes.peek().size()));
 
         for (final Stmt.Function method : stmt.methods()) {
-            final FunctionType declaration = FunctionType.METHOD;
+            FunctionType declaration = FunctionType.METHOD;
+            if(method.name().lexeme().equals("init")) declaration = FunctionType.INITIALIZER;
             resolveFunction(method, declaration);
         }
 
@@ -310,7 +312,13 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
             Lox.error(stmt.keyword(), "Can't return from top-level code.");
         }
 
-        if(stmt.value() != null) resolve(stmt.value());
+        if(stmt.value() != null){
+            if(currentFunction == FunctionType.INITIALIZER) {
+                Lox.error(stmt.keyword(), "Can't return a value from an initializer.");
+            }
+
+            resolve(stmt.value());
+        }
 
         return null;
     }
