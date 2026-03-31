@@ -171,15 +171,12 @@ public class Lexer {
             if(peek() == '\n') line++;
             if(peek() == '/' && peekNext() == '*') {
                 advance();
-                advance();
                 depth++;
             } else if(peek() == '*' && peekNext() == '/') {
                 advance();
-                advance();
                 depth--;
-            } else {
-                advance();
             }
+            advance();
         }
 
         if(isAtEnd()) Lox.error(line, "Unterminated multiline comment.");

@@ -16,8 +16,7 @@ public class Parser {
     private int loopDepth;
     private static final int MAX_ARGUMENTS = 0xFF;
 
-    private static class ParseError extends RuntimeException {
-    }
+    private static class ParseError extends RuntimeException { }
 
     private final List<Token> tokens;
     private int current;
