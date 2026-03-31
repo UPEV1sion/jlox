@@ -44,8 +44,10 @@ public class LoxFunction implements LoxCallable {
     public Object call(final Interpreter interpreter, final List<Object> arguments) {
         final Environment environment = new Environment(closure);
 
-        for (int i = 0; i < declaration.params().size(); i++) {
-            environment.define(arguments.get(i));
+        if(declaration.params() != null) {
+            for (int i = 0; i < declaration.params().size(); i++) {
+                environment.define(arguments.get(i));
+            }
         }
 
         try {
@@ -60,6 +62,10 @@ public class LoxFunction implements LoxCallable {
         if(isInitializer) return closure.getAt(0, 0); // this
 
         return null;
+    }
+
+    public boolean isGetter() {
+        return declaration.params() == null;
     }
 
     @Override
