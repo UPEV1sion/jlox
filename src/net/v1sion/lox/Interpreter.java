@@ -114,7 +114,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Object visitGetExpr(final Get expr) {
         final Object object = evaluate(expr.object());
         if(object instanceof final LoxInstance instance) {
-            return instance.get(expr.name());
+            final Object result = instance.get(expr.name());
+            if(result instanceof final LoxFunction getter && getter.isGetter()) {
+                return getter.call(this, null);
+            }
+            return result;
         }
 
         throw new RuntimeError(expr.name(), "Only instances have properties.");
@@ -131,6 +135,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         throw new RuntimeError(expr.name(), "Only instances have fields.");
+    }
+
+    @Override
+    public Object visitThisExpr(final This expr) {
+        return lookupVariable(expr.keyword(), expr);
     }
 
     @Override
@@ -199,7 +208,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitFunctionExpr(final Expr.Function expr) {
-        return new LoxFunction(null, expr, environment);
+        return new LoxFunction(null, expr, environment, false);
     }
 
     void interpret(final List<Stmt> statements) {
@@ -295,15 +304,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitClassStmt(final Stmt.Class stmt) {
         final int slot = define(stmt.name(), null);
 
+        final Map<String, LoxFunction> classMethods = new HashMap<>();
+        for(final Stmt.Function classMethod : stmt.classMethods()) {
+            final String name = classMethod.name().lexeme();
+            final LoxFunction function = new LoxFunction(name, classMethod.function(), environment, false);
+            classMethods.put(name, function);
+        }
+
         final Map<String, LoxFunction> methods = new HashMap<>();
         for(final Stmt.Function method : stmt.methods()) {
             final String name = method.name().lexeme();
-            final LoxFunction function = new LoxFunction(name, method.function(), environment);
+            final LoxFunction function = new LoxFunction(name, method.function(), environment, name.equals("init"));
             methods.put(name, function);
         }
 
+        final LoxClass metaclass = new LoxClass(null, stmt.name().lexeme() + " metaclass", classMethods);
+
         final String name = stmt.name().lexeme();
-        final LoxClass klass = new LoxClass(name, methods);
+        final LoxClass klass = new LoxClass(metaclass, name, methods);
         if(environment != null) {
             environment.assignAt(0, slot, klass);
         } else {
@@ -327,7 +345,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitFunctionStmt(final Stmt.Function stmt) {
         final String name = stmt.name().lexeme();
-        final LoxFunction function = new LoxFunction(name, stmt.function(), environment);
+        final LoxFunction function = new LoxFunction(name, stmt.function(), environment, false);
         define(stmt.name(), function);
 
         return null;

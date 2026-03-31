@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 21.03.2026
+ * at 21.02.26, revision 29.03.2026
  **/
 
 public interface Expr {
@@ -16,6 +16,7 @@ public interface Expr {
         R visitCallExpr(final Call expr);
         R visitGetExpr(final Get expr);
         R visitSetExpr(final Set expr);
+        R visitThisExpr(final This expr);
         R visitGroupingExpr(final Grouping expr);
         R visitLiteralExpr(final Literal expr);
         R visitLogicalExpr(final Logical expr);
@@ -62,6 +63,14 @@ public interface Expr {
         @Override
         public <R> R accept (final Visitor<R> visitor) {
             return visitor.visitSetExpr(this);
+        }
+    }
+
+    record This(Token keyword) implements Expr {
+
+        @Override
+        public <R> R accept (final Visitor<R> visitor) {
+            return visitor.visitThisExpr(this);
         }
     }
 

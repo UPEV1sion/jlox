@@ -12,7 +12,7 @@ import java.util.Map;
  **/
 
 
-public final class LoxInstance {
+public class LoxInstance {
     private final LoxClass klass;
     private final Map<String, Object> fields = new HashMap<>();
 
@@ -26,7 +26,7 @@ public final class LoxInstance {
         }
 
         final LoxFunction method = klass.findMethod(name.lexeme());
-        if(method != null) return method;
+        if(method != null) return method.bind(this);
 
         throw new RuntimeError(name, "Undefined property '" + name.lexeme() + "'.");
     }
