@@ -12,7 +12,7 @@ import java.util.Map;
  **/
 
 
-public final class LoxInstance {
+public class LoxInstance {
     private final LoxClass klass;
     private final Map<String, Object> fields = new HashMap<>();
 

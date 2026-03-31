@@ -73,13 +73,15 @@ public class Parser {
         consume(LEFT_BRACE, "Expect '{' before class body.");
 
         final List<Stmt.Function> methods = new ArrayList<>();
+        final List<Stmt.Function> classMethods = new ArrayList<>();
         while(!check(RIGHT_BRACE) && !isAtEnd()) {
-            methods.add(functionStatement("method"));
+            final boolean isClass = match(CLASS);
+            (isClass ? classMethods : methods).add(functionStatement("method"));
         }
 
         consume(RIGHT_BRACE, "Expect '}' before class body.");
 
-        return new Stmt.Class(name, methods);
+        return new Stmt.Class(name, methods, classMethods);
     }
 
     private Stmt statement() {

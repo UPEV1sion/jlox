@@ -300,15 +300,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitClassStmt(final Stmt.Class stmt) {
         final int slot = define(stmt.name(), null);
 
+        final Map<String, LoxFunction> classMethods = new HashMap<>();
+        for(final Stmt.Function classMethod : stmt.classMethods()) {
+            final String name = classMethod.name().lexeme();
+            final LoxFunction function = new LoxFunction(name, classMethod.function(), environment, false);
+            classMethods.put(name, function);
+        }
+
         final Map<String, LoxFunction> methods = new HashMap<>();
         for(final Stmt.Function method : stmt.methods()) {
             final String name = method.name().lexeme();
-            final LoxFunction function = new LoxFunction(name, method.function(), environment, method.name().lexeme().equals("init"));
+            final LoxFunction function = new LoxFunction(name, method.function(), environment, name.equals("init"));
             methods.put(name, function);
         }
 
+        final LoxClass metaclass = new LoxClass(null, stmt.name().lexeme() + " metaclass", classMethods);
+
         final String name = stmt.name().lexeme();
-        final LoxClass klass = new LoxClass(name, methods);
+        final LoxClass klass = new LoxClass(metaclass, name, methods);
         if(environment != null) {
             environment.assignAt(0, slot, klass);
         } else {

@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * @author Emanuel Schäffer
- * at 21.02.26, revision 24.03.2026
+ * at 21.02.26, revision 29.03.2026
  **/
 
 public interface Stmt {
@@ -32,7 +32,7 @@ public interface Stmt {
         }
     }
 
-    record Class(Token name, List<Stmt.Function> methods) implements Stmt {
+    record Class(Token name, List<Stmt.Function> methods, List<Stmt.Function> classMethods) implements Stmt {
 
         @Override
         public <R> R accept (final Visitor<R> visitor) {
