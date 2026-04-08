@@ -11,7 +11,7 @@ all:
 	javac -d $(OUT_DIR) $(SOURCES)
 
 run: all
-	java -cp $(OUT_DIR) $(MAIN)
+	java -cp $(OUT_DIR) $(MAIN) test.lox
 
 clean:
 	rm -rf $(OUT_DIR)
