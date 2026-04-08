@@ -13,11 +13,16 @@ import java.util.Map;
 public class LoxClass extends LoxInstance implements LoxCallable {
     private final String name;
     private final Map<String, LoxFunction> methods;
+    private final LoxClass superclass;
 
-    public LoxClass(final LoxClass metaclass, final String name, final Map<String, LoxFunction> methods) {
+    public LoxClass(final LoxClass metaclass,
+                    final LoxClass superclass,
+                    final String name,
+                    final Map<String, LoxFunction> methods) {
         super(metaclass);
         this.name = name;
         this.methods = methods;
+        this.superclass = superclass;
     }
 
     @Override

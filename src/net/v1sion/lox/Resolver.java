@@ -260,6 +260,16 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         declare(stmt.name());
         define(stmt.name());
 
+        if(stmt.superclass() != null) {
+            final String name = stmt.name().lexeme();
+            final String superclassName = stmt.superclass().name().lexeme();
+            if(name.equals(superclassName)) {
+                Lox.error(stmt.superclass().name(), "A class can't inherit from itself.");
+            }
+
+            resolve(stmt.superclass());
+        }
+
         beginScope();
         final Token thisToken = new Token(TokenType.THIS, "this", null, stmt.name().line());
         scopes.peek().put("this", new Variable(thisToken, VariableState.READ, scopes.peek().size()));
