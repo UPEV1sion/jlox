@@ -37,6 +37,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     }
 
     private enum ClassType {
+        SUBCLASS,
         CLASS,
         NONE,
     }
@@ -166,6 +167,19 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     }
 
     @Override
+    public Void visitSuperExpr(final Expr.Super expr) {
+        if(currentClass == ClassType.NONE) {
+            Lox.error(expr.keyword(), "Can't use 'super' outside of an class.");
+        } else if(currentClass != ClassType.SUBCLASS) {
+            Lox.error(expr.keyword(), "Can't use 'super' in a class with no superclass.");
+        }
+
+        resolveLocal(expr, expr.keyword(), true);
+
+        return null;
+    }
+
+    @Override
     public Void visitThisExpr(final Expr.This expr) {
         if(currentClass == ClassType.NONE) {
             Lox.error(expr.keyword(), "Can't use 'this' outside of an class.");
@@ -173,6 +187,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         }
 
         resolveLocal(expr, expr.keyword(), true);
+
         return null;
     }
 
@@ -266,8 +281,14 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
             if(name.equals(superclassName)) {
                 Lox.error(stmt.superclass().name(), "A class can't inherit from itself.");
             }
-
+            currentClass = ClassType.SUBCLASS;
             resolve(stmt.superclass());
+        }
+
+        if(stmt.superclass() != null) {
+            beginScope();
+            final Token superToken = new Token(TokenType.SUPER, "super", null, stmt.name().line());
+            scopes.peek().put("super", new Variable(superToken, VariableState.READ, scopes.peek().size()));
         }
 
         beginScope();
@@ -288,6 +309,9 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         }
 
         endScope();
+
+        if(stmt.superclass() != null) endScope();
+
         currentClass = enclosingClass;
 
         return null;

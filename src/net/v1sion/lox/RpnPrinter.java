@@ -40,6 +40,11 @@ public class RpnPrinter implements Visitor<String> {
     }
 
     @Override
+    public String visitSuperExpr(Super expr) {
+        return "";
+    }
+
+    @Override
     public String visitThisExpr(This expr) {
         return "";
     }

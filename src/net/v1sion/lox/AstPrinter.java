@@ -89,6 +89,11 @@ public class AstPrinter implements Stmt.Visitor<String>, Expr.Visitor<String> {
     }
 
     @Override
+    public String visitSuperExpr(Super expr) {
+        return "";
+    }
+
+    @Override
     public String visitThisExpr(This expr) {
         return "";
     }
