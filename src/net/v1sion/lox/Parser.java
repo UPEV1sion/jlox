@@ -53,6 +53,7 @@ public class Parser {
 
     private Stmt declaration() {
         try {
+            if(match(MIXIN)) return mixinDeclaration();
             if(match(CLASS)) return classDeclaration();
             if(check(FUN) && checkNext(IDENTIFIER)) {
                 consume(FUN, null);
@@ -67,6 +68,35 @@ public class Parser {
         }
     }
 
+    private List<Expr> withClause() {
+        final List<Expr> mixins = new ArrayList<>();
+
+        if(match(WITH)) {
+            do {
+                mixins.add(new Expr.Variable(consume(IDENTIFIER, "Expect mixins name.")));
+            } while (match(COMMA));
+        }
+
+        return mixins;
+    }
+
+    private Stmt mixinDeclaration() {
+        final Token name = consume(IDENTIFIER, "Expect mixin name.");
+
+        consume(LEFT_BRACE, "Expect '{' before class body.");
+
+        final List<Stmt.Function> methods = new ArrayList<>();
+        while(!check(RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(functionStatement("method"));
+        }
+
+        final List<Expr> mixins = withClause();
+
+        consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+        return new Stmt.Mixin(name, mixins, methods);
+    }
+
     private Stmt classDeclaration() {
         final Token name = consume(IDENTIFIER, "Expect class name.");
 
@@ -76,7 +106,9 @@ public class Parser {
             superclass = new Expr.Variable(previous());
         }
 
-        consume(LEFT_BRACE, "Expect '{' before class body.");
+        final List<Expr> mixins = withClause();
+
+        consume(LEFT_BRACE, "Expect '{' after class body.");
 
         final List<Stmt.Function> methods = new ArrayList<>();
         final List<Stmt.Function> classMethods = new ArrayList<>();
@@ -87,7 +119,7 @@ public class Parser {
 
         consume(RIGHT_BRACE, "Expect '}' before class body.");
 
-        return new Stmt.Class(name, superclass, methods, classMethods);
+        return new Stmt.Class(name, superclass, mixins, methods, classMethods);
     }
 
     private Stmt statement() {

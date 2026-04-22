@@ -1,9 +1,6 @@
 package net.v1sion.lox;
 
-import net.v1sion.lox.callables.LoxCallable;
-import net.v1sion.lox.callables.LoxClass;
-import net.v1sion.lox.callables.LoxFunction;
-import net.v1sion.lox.callables.LoxInstance;
+import net.v1sion.lox.callables.*;
 import net.v1sion.lox.exceptions.BreakException;
 import net.v1sion.lox.exceptions.ContinueException;
 import net.v1sion.lox.exceptions.ReturnException;
@@ -363,6 +360,49 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         return null;
+    }
+
+    @Override
+    public Void visitMixinStmt(final Mixin stmt) {
+        define(stmt.name(), null);
+
+        final Map<String, LoxFunction> methods = applyMixins(stmt.mixins());
+
+        for(final Stmt.Function method : stmt.methods()) {
+            final String name = method.name().lexeme();
+            if(methods.containsKey(name)) {
+                throw new RuntimeError(method.name(), "A previous mixin declares a method named '"
+                + method.name().lexeme() + "'.");
+            }
+
+            final LoxFunction function = new LoxFunction(name, method.function(), environment, false);
+            methods.put(name, function);
+        }
+
+        return null;
+    }
+
+    private Map<String, LoxFunction> applyMixins(final List<Expr> mixins) {
+        final Map<String, LoxFunction> methods = new HashMap<>();
+
+        for(final Expr mixinsExpr : mixins) {
+            final Object mixinsObject = evaluate(mixinsExpr);
+            if(!(mixinsObject instanceof final LoxMixin mixin)) {
+                final Token name = ((Expr.Variable) mixinsObject).name();
+                throw new RuntimeError(name, "'" + name.lexeme() + "' is not a mixin.");
+            }
+
+            for(final String name : mixin.methods().keySet()) {
+                if(methods.containsKey(name)) {
+                    throw new RuntimeError(mixin.name(),
+                            "A previous mixin declares a method named '" + name + "'.");
+                }
+
+                methods.put(name, mixin.methods().get(name));
+            }
+        }
+
+        return methods;
     }
 
     @Override

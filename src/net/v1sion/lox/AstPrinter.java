@@ -167,6 +167,11 @@ public class AstPrinter implements Stmt.Visitor<String>, Expr.Visitor<String> {
     }
 
     @Override
+    public String visitMixinStmt(final Stmt.Mixin stmt) {
+        return "";
+    }
+
+    @Override
     public String visitExpressionStmt(final Stmt.Expression stmt) {
         return "";
     }

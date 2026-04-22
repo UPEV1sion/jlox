@@ -41,6 +41,8 @@ public class Lexer {
         keywords.put("while",     WHILE);
         keywords.put("break",     BREAK);
         keywords.put("continue",  CONTINUE);
+        keywords.put("mixin",     MIXIN);
+        keywords.put("with",      WITH);
     }
 
     Lexer(final String source) {

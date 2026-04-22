@@ -38,6 +38,7 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
 
     private enum ClassType {
         SUBCLASS,
+        MIXIN,
         CLASS,
         NONE,
     }
@@ -170,6 +171,8 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
     public Void visitSuperExpr(final Expr.Super expr) {
         if(currentClass == ClassType.NONE) {
             Lox.error(expr.keyword(), "Can't use 'super' outside of an class.");
+        } else if(currentClass == ClassType.MIXIN) {
+            Lox.error(expr.keyword(), "Can't use 'super' in a mixin.");
         } else if(currentClass != ClassType.SUBCLASS) {
             Lox.error(expr.keyword(), "Can't use 'super' in a class with no superclass.");
         }
@@ -291,6 +294,10 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
             scopes.peek().put("super", new Variable(superToken, VariableState.READ, scopes.peek().size()));
         }
 
+        for(final Expr mixin : stmt.mixins()) {
+            resolve(mixin);
+        }
+
         beginScope();
         final Token thisToken = new Token(TokenType.THIS, "this", null, stmt.name().line());
         scopes.peek().put("this", new Variable(thisToken, VariableState.READ, scopes.peek().size()));
@@ -311,6 +318,30 @@ public class Resolver implements Stmt.Visitor<Void>, Expr.Visitor<Void> {
         endScope();
 
         if(stmt.superclass() != null) endScope();
+
+        currentClass = enclosingClass;
+
+        return null;
+    }
+
+    @Override
+    public Void visitMixinStmt(final Stmt.Mixin stmt) {
+        declare(stmt.name());
+        define(stmt.name());
+
+        final ClassType enclosingClass = currentClass;
+        currentClass = ClassType.MIXIN;
+
+        beginScope();
+
+        final Token thisToken = new Token(TokenType.THIS, "this", null, stmt.name().line());
+        scopes.peek().put("this", new Variable(thisToken, VariableState.READ, scopes.peek().size()));
+
+        for (final Stmt.Function method : stmt.methods()) {
+            resolveFunction(method, FunctionType.METHOD);
+        }
+
+        endScope();
 
         currentClass = enclosingClass;
 
