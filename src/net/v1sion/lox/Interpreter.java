@@ -387,18 +387,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         for(final Expr mixinsExpr : mixins) {
             final Object mixinsObject = evaluate(mixinsExpr);
-            if(!(mixinsObject instanceof final LoxMixin mixin)) {
+            if(!(mixinsObject instanceof LoxMixin(final Token loxName, final Map<String, LoxFunction> loxMethods))) {
                 final Token name = ((Expr.Variable) mixinsObject).name();
                 throw new RuntimeError(name, "'" + name.lexeme() + "' is not a mixin.");
             }
 
-            for(final String name : mixin.methods().keySet()) {
+            for(final String name : loxMethods.keySet()) {
                 if(methods.containsKey(name)) {
-                    throw new RuntimeError(mixin.name(),
-                            "A previous mixin declares a method named '" + name + "'.");
+                    throw new RuntimeError(loxName, "A previous mixin declares a method named '" + name + "'.");
                 }
 
-                methods.put(name, mixin.methods().get(name));
+                methods.put(name, loxMethods.get(name));
             }
         }
 
