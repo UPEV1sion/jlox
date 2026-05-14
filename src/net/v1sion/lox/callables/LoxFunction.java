@@ -29,9 +29,10 @@ public class LoxFunction implements LoxCallable {
         this.isInitializer = isInitializer;
     }
 
-    public LoxFunction bind(final LoxInstance instance) {
+    public LoxFunction bind(final LoxInstance instance, final LoxFunction inner) {
         final Environment environment = new Environment(closure);
         environment.define(instance);
+        environment.define(inner);
         return new LoxFunction(name, declaration, environment, isInitializer);
     }
 

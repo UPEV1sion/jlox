@@ -145,7 +145,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             throw new RuntimeError(expr.method(), "Undefined property '" + expr.method().lexeme() + "'.");
         }
 
-        return method.bind(object);
+        return method.bind(object, null);
     }
 
     @Override

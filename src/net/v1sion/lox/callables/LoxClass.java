@@ -41,15 +41,27 @@ public class LoxClass extends LoxInstance implements LoxCallable {
     public Object call(final Interpreter interpreter, final List<Object> arguments) {
         final LoxInstance instance = new LoxInstance(this);
         final LoxFunction initializer = findMethod("init");
-        if (initializer != null) initializer.bind(instance).call(interpreter, arguments);
+        if (initializer != null) initializer.call(interpreter, arguments);
 
         return instance;
     }
 
     public LoxFunction findMethod(final String name) {
-        if (methods.containsKey(name)) return methods.get(name);
+        LoxFunction method = null;
+        LoxFunction inner = null;
+        LoxClass klass = this;
+        while(klass != null) {
+            if(klass.methods.containsKey(name)) {
+                inner = method;
+                method = klass.methods.get(name);
+            }
 
-        if(superclass != null) return superclass.findMethod(name);
+            klass = klass.superclass;
+        }
+
+        if(method != null) {
+            return method.bind(new LoxInstance(this), inner);
+        }
 
         return null;
     }
